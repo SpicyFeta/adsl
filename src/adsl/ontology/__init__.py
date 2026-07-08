@@ -1,0 +1,1 @@
+"""Palantir Ontology integration layer."""

@@ -1,0 +1,1 @@
+"""Red and Blue agent logic."""

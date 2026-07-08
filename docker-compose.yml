@@ -1,0 +1,12 @@
+services:
+  adsl:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: adsl-phase1:dev
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./docs:/app/docs
+    working_dir: /app
+    command: ["uv", "run", "pytest"]
