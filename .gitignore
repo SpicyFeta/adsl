@@ -82,6 +82,7 @@ docker-compose.override.yml
 logs/
 data/synthetic/*
 !data/synthetic/.gitkeep
+!data/synthetic/*.json
 
 # Jupyter
 .ipynb_checkpoints/

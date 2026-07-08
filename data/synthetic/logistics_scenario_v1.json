@@ -1,0 +1,460 @@
+{
+  "scenario": {
+    "scenario_id": "kessari-strait-v1",
+    "name": "Kessari Strait Contested Logistics",
+    "description": "A small contested logistics network spanning two ports, three distribution hubs, three depots, and two forward operating bases. Red interdiction forces threaten coastal and inland supply routes while Blue logistics elements attempt to sustain throughput under pressure.",
+    "metadata": {
+      "theater": "Kessari Strait",
+      "duration_days": 14,
+      "contestation_level": "moderate",
+      "primary_objective": "Sustain FOB resupply despite route interdiction"
+    },
+    "nodes": [
+      {
+        "node_id": "N-PORT-01",
+        "name": "Kessari Main Seaport",
+        "node_type": "PORT",
+        "latitude": 35.42,
+        "longitude": 25.14,
+        "capacity": 500.0,
+        "current_load": 410.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "critical",
+          "throughput_tons_per_day": 500,
+          "hardening_level": "medium"
+        }
+      },
+      {
+        "node_id": "N-PORT-02",
+        "name": "South Bay Auxiliary Port",
+        "node_type": "PORT",
+        "latitude": 35.08,
+        "longitude": 25.62,
+        "capacity": 220.0,
+        "current_load": 175.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "throughput_tons_per_day": 220,
+          "hardening_level": "low"
+        }
+      },
+      {
+        "node_id": "N-DEPOT-01",
+        "name": "Central Supply Depot",
+        "node_type": "DEPOT",
+        "latitude": 35.31,
+        "longitude": 25.38,
+        "capacity": 350.0,
+        "current_load": 290.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "critical",
+          "commodity_mix": ["fuel", "ammunition", "rations"],
+          "hardening_level": "medium"
+        }
+      },
+      {
+        "node_id": "N-DEPOT-02",
+        "name": "Inland Forward Depot",
+        "node_type": "DEPOT",
+        "latitude": 35.18,
+        "longitude": 25.51,
+        "capacity": 180.0,
+        "current_load": 142.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "commodity_mix": ["ammunition", "spare_parts"],
+          "hardening_level": "low"
+        }
+      },
+      {
+        "node_id": "N-DEPOT-03",
+        "name": "Medical Supply Depot",
+        "node_type": "DEPOT",
+        "latitude": 35.25,
+        "longitude": 25.72,
+        "capacity": 90.0,
+        "current_load": 68.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "commodity_mix": ["medical", "blood", "pharmaceuticals"],
+          "hardening_level": "medium"
+        }
+      },
+      {
+        "node_id": "N-HUB-01",
+        "name": "Coastal Distribution Hub",
+        "node_type": "HUB",
+        "latitude": 35.36,
+        "longitude": 25.28,
+        "capacity": 280.0,
+        "current_load": 230.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "routing_priority": 1
+        }
+      },
+      {
+        "node_id": "N-HUB-02",
+        "name": "Central Transit Hub",
+        "node_type": "HUB",
+        "latitude": 35.22,
+        "longitude": 25.44,
+        "capacity": 240.0,
+        "current_load": 198.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "routing_priority": 2
+        }
+      },
+      {
+        "node_id": "N-HUB-03",
+        "name": "Southern Relay Hub",
+        "node_type": "HUB",
+        "latitude": 35.12,
+        "longitude": 25.58,
+        "capacity": 160.0,
+        "current_load": 121.0,
+        "status": "DEGRADED",
+        "metadata": {
+          "strategic_value": "medium",
+          "routing_priority": 3,
+          "degradation_reason": "intermittent_power"
+        }
+      },
+      {
+        "node_id": "N-FOB-01",
+        "name": "FOB Ridgeline",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 35.15,
+        "longitude": 25.67,
+        "capacity": 120.0,
+        "current_load": 95.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "critical",
+          "daily_consumption": 18.0,
+          "days_of_supply": 5.2
+        }
+      },
+      {
+        "node_id": "N-FOB-02",
+        "name": "FOB Sandstone",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 35.05,
+        "longitude": 25.79,
+        "capacity": 100.0,
+        "current_load": 88.0,
+        "status": "DEGRADED",
+        "metadata": {
+          "strategic_value": "high",
+          "daily_consumption": 22.0,
+          "days_of_supply": 3.1,
+          "degradation_reason": "route_closure_pressure"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "route_id": "R-001",
+        "name": "Main Seaport to Coastal Hub",
+        "source_node_id": "N-PORT-01",
+        "target_node_id": "N-HUB-01",
+        "capacity": 80.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "coastal_highway", "distance_km": 42 }
+      },
+      {
+        "route_id": "R-002",
+        "name": "Main Seaport to Central Depot",
+        "source_node_id": "N-PORT-01",
+        "target_node_id": "N-DEPOT-01",
+        "capacity": 60.0,
+        "transit_time_hours": 5.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 58 }
+      },
+      {
+        "route_id": "R-003",
+        "name": "Auxiliary Port to Southern Relay",
+        "source_node_id": "N-PORT-02",
+        "target_node_id": "N-HUB-03",
+        "capacity": 35.0,
+        "transit_time_hours": 3.0,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "medium", "terrain": "coastal_road", "distance_km": 28, "threat_type": "indirect_fire" }
+      },
+      {
+        "route_id": "R-004",
+        "name": "Coastal Hub to Central Depot",
+        "source_node_id": "N-HUB-01",
+        "target_node_id": "N-DEPOT-01",
+        "capacity": 50.0,
+        "transit_time_hours": 2.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 22 }
+      },
+      {
+        "route_id": "R-005",
+        "name": "Coastal Hub to Central Transit",
+        "source_node_id": "N-HUB-01",
+        "target_node_id": "N-HUB-02",
+        "capacity": 45.0,
+        "transit_time_hours": 3.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "medium", "terrain": "mountain_pass", "distance_km": 36 }
+      },
+      {
+        "route_id": "R-006",
+        "name": "Central Transit to Inland Depot",
+        "source_node_id": "N-HUB-02",
+        "target_node_id": "N-DEPOT-02",
+        "capacity": 40.0,
+        "transit_time_hours": 2.0,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "medium", "terrain": "valley_road", "distance_km": 18, "threat_type": "ambush" }
+      },
+      {
+        "route_id": "R-007",
+        "name": "Central Transit to FOB Ridgeline",
+        "source_node_id": "N-HUB-02",
+        "target_node_id": "N-FOB-01",
+        "capacity": 30.0,
+        "transit_time_hours": 4.0,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "high", "terrain": "unpaved_track", "distance_km": 44, "threat_type": "ied" }
+      },
+      {
+        "route_id": "R-008",
+        "name": "Central Depot to Central Transit",
+        "source_node_id": "N-DEPOT-01",
+        "target_node_id": "N-HUB-02",
+        "capacity": 55.0,
+        "transit_time_hours": 3.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 30 }
+      },
+      {
+        "route_id": "R-009",
+        "name": "Inland Depot to FOB Ridgeline",
+        "source_node_id": "N-DEPOT-02",
+        "target_node_id": "N-FOB-01",
+        "capacity": 25.0,
+        "transit_time_hours": 3.5,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "high", "terrain": "ridge_road", "distance_km": 26, "threat_type": "indirect_fire" }
+      },
+      {
+        "route_id": "R-010",
+        "name": "Inland Depot to FOB Sandstone",
+        "source_node_id": "N-DEPOT-02",
+        "target_node_id": "N-FOB-02",
+        "capacity": 20.0,
+        "transit_time_hours": 5.0,
+        "status": "CLOSED",
+        "metadata": { "risk_level": "critical", "terrain": "exposed_corridor", "distance_km": 38, "closure_reason": "sustained_interdiction" }
+      },
+      {
+        "route_id": "R-011",
+        "name": "FOB Ridgeline to FOB Sandstone",
+        "source_node_id": "N-FOB-01",
+        "target_node_id": "N-FOB-02",
+        "capacity": 15.0,
+        "transit_time_hours": 2.5,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "high", "terrain": "ridgeline_track", "distance_km": 16, "threat_type": "sniper" }
+      },
+      {
+        "route_id": "R-012",
+        "name": "Southern Relay to Auxiliary Port",
+        "source_node_id": "N-HUB-03",
+        "target_node_id": "N-PORT-02",
+        "capacity": 30.0,
+        "transit_time_hours": 2.5,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "medium", "terrain": "coastal_road", "distance_km": 24, "threat_type": "raids" }
+      },
+      {
+        "route_id": "R-013",
+        "name": "Southern Relay to Medical Depot",
+        "source_node_id": "N-HUB-03",
+        "target_node_id": "N-DEPOT-03",
+        "capacity": 20.0,
+        "transit_time_hours": 2.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 14 }
+      },
+      {
+        "route_id": "R-014",
+        "name": "Medical Depot to Coastal Hub",
+        "source_node_id": "N-DEPOT-03",
+        "target_node_id": "N-HUB-01",
+        "capacity": 25.0,
+        "transit_time_hours": 4.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "coastal_highway", "distance_km": 48 }
+      },
+      {
+        "route_id": "R-015",
+        "name": "Main Seaport to Southern Relay",
+        "source_node_id": "N-PORT-01",
+        "target_node_id": "N-HUB-03",
+        "capacity": 40.0,
+        "transit_time_hours": 6.0,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "medium", "terrain": "coastal_highway", "distance_km": 62, "threat_type": "uav_surveillance" }
+      },
+      {
+        "route_id": "R-016",
+        "name": "Coastal Hub to FOB Sandstone",
+        "source_node_id": "N-HUB-01",
+        "target_node_id": "N-FOB-02",
+        "capacity": 28.0,
+        "transit_time_hours": 5.5,
+        "status": "CONTESTED",
+        "metadata": { "risk_level": "high", "terrain": "mountain_pass", "distance_km": 54, "threat_type": "indirect_fire" }
+      },
+      {
+        "route_id": "R-017",
+        "name": "Central Depot to Inland Depot",
+        "source_node_id": "N-DEPOT-01",
+        "target_node_id": "N-DEPOT-02",
+        "capacity": 35.0,
+        "transit_time_hours": 3.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 28 }
+      },
+      {
+        "route_id": "R-018",
+        "name": "Central Transit to Southern Relay",
+        "source_node_id": "N-HUB-02",
+        "target_node_id": "N-HUB-03",
+        "capacity": 32.0,
+        "transit_time_hours": 3.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "medium", "terrain": "valley_road", "distance_km": 32 }
+      }
+    ]
+  },
+  "blue_force_elements": [
+    {
+      "element_id": "BLUE-LOG-01",
+      "name": "Convoy Alpha",
+      "side": "BLUE",
+      "role": "LOGISTICS_MANAGER",
+      "home_node_id": "N-DEPOT-01",
+      "patrol_route_ids": ["R-004", "R-008", "R-017"],
+      "readiness": 0.92,
+      "metadata": { "unit_type": "logistics_convoy", "vehicles": 12, "priority_mission": "depot_resupply" }
+    },
+    {
+      "element_id": "BLUE-LOG-02",
+      "name": "Convoy Bravo",
+      "side": "BLUE",
+      "role": "ROUTE_COORDINATOR",
+      "home_node_id": "N-HUB-01",
+      "patrol_route_ids": ["R-001", "R-005", "R-014"],
+      "readiness": 0.88,
+      "metadata": { "unit_type": "logistics_convoy", "vehicles": 8, "priority_mission": "hub_distribution" }
+    },
+    {
+      "element_id": "BLUE-SEC-01",
+      "name": "Route Security Team North",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-HUB-02",
+      "patrol_route_ids": ["R-006", "R-007"],
+      "readiness": 0.85,
+      "metadata": { "unit_type": "security_element", "personnel": 24, "priority_mission": "route_hardening" }
+    },
+    {
+      "element_id": "BLUE-SEC-02",
+      "name": "Route Security Team South",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-HUB-03",
+      "patrol_route_ids": ["R-003", "R-012", "R-015"],
+      "readiness": 0.79,
+      "metadata": { "unit_type": "security_element", "personnel": 18, "priority_mission": "contested_corridor_patrol" }
+    },
+    {
+      "element_id": "BLUE-DEP-01",
+      "name": "Inland Depot Operations",
+      "side": "BLUE",
+      "role": "DEPOT_OPERATOR",
+      "home_node_id": "N-DEPOT-02",
+      "patrol_route_ids": ["R-009", "R-010"],
+      "readiness": 0.9,
+      "metadata": { "unit_type": "depot_cell", "personnel": 32, "priority_mission": "fob_push_packages" }
+    },
+    {
+      "element_id": "BLUE-HUB-01",
+      "name": "Central Transit Controller",
+      "side": "BLUE",
+      "role": "DISTRIBUTION_CONTROLLER",
+      "home_node_id": "N-HUB-02",
+      "patrol_route_ids": ["R-005", "R-018", "R-016"],
+      "readiness": 0.94,
+      "metadata": { "unit_type": "hub_control", "personnel": 14, "priority_mission": "network_flow_optimization" }
+    },
+    {
+      "element_id": "BLUE-MED-01",
+      "name": "Medical Logistics Cell",
+      "side": "BLUE",
+      "role": "MEDICAL_LOGISTICS",
+      "home_node_id": "N-DEPOT-03",
+      "patrol_route_ids": ["R-013", "R-014"],
+      "readiness": 0.96,
+      "metadata": { "unit_type": "medical_logistics", "personnel": 10, "priority_mission": "medical_supply_continuity" }
+    }
+  ],
+  "red_force_elements": [
+    {
+      "element_id": "RED-STRIKE-01",
+      "name": "Interdiction Cell Alpha",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-007", "R-009", "R-010"],
+      "readiness": 0.87,
+      "metadata": { "unit_type": "interdiction_cell", "capability": "indirect_fire", "priority_target": "fob_supply_routes" }
+    },
+    {
+      "element_id": "RED-STRIKE-02",
+      "name": "Interdiction Cell Bravo",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-003", "R-015", "R-016"],
+      "readiness": 0.82,
+      "metadata": { "unit_type": "interdiction_cell", "capability": "raids", "priority_target": "coastal_corridors" }
+    },
+    {
+      "element_id": "RED-SIGINT-01",
+      "name": "SIGINT Support Detachment",
+      "side": "RED",
+      "role": "RECONNAISSANCE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-001", "R-005", "R-018"],
+      "readiness": 0.91,
+      "metadata": { "unit_type": "sigint", "capability": "movement_detection", "priority_target": "convoy_timing" }
+    },
+    {
+      "element_id": "RED-ROCKET-01",
+      "name": "Rocket Artillery Battery",
+      "side": "RED",
+      "role": "FIRE_SUPPORT",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-006", "R-011"],
+      "readiness": 0.75,
+      "metadata": { "unit_type": "artillery", "capability": "area_denial", "priority_target": "hub_nodes" }
+    }
+  ]
+}

@@ -115,6 +115,63 @@ class ADSL_Scenario(BaseModel):
         return self
 
 
+class ADSL_ForceElement(BaseModel):
+    """A force element assigned to Red or Blue operations in a scenario."""
+
+    element_id: str
+    name: str
+    side: AgentSide
+    role: str
+    home_node_id: str | None = None
+    patrol_route_ids: list[str] = Field(default_factory=list)
+    readiness: float = Field(default=1.0, ge=0.0, le=1.0)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ADSL_ScenarioPackage(BaseModel):
+    """Complete scenario dataset including force elements."""
+
+    scenario: ADSL_Scenario
+    blue_force_elements: list[ADSL_ForceElement] = Field(default_factory=list)
+    red_force_elements: list[ADSL_ForceElement] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_force_element_sides(self) -> ADSL_ScenarioPackage:
+        for element in self.blue_force_elements:
+            if element.side != AgentSide.BLUE:
+                raise ValueError(
+                    f"Blue force element {element.element_id} has side {element.side}"
+                )
+        for element in self.red_force_elements:
+            if element.side != AgentSide.RED:
+                raise ValueError(
+                    f"Red force element {element.element_id} has side {element.side}"
+                )
+        return self
+
+
+class SimulationEventType(str, Enum):
+    TICK_START = "TICK_START"
+    AGENT_DECISION = "AGENT_DECISION"
+    ACTION_RECORDED = "ACTION_RECORDED"
+    TICK_END = "TICK_END"
+    RUN_STARTED = "RUN_STARTED"
+    RUN_COMPLETED = "RUN_COMPLETED"
+
+
+class SimulationEvent(BaseModel):
+    """Recorded simulation event for audit and replay."""
+
+    event_id: str = Field(default_factory=lambda: str(uuid4()))
+    run_id: str
+    simulation_tick: int = Field(ge=0)
+    event_type: SimulationEventType
+    agent_id: str | None = None
+    agent_side: AgentSide | None = None
+    payload: dict[str, Any] = Field(default_factory=dict)
+    recorded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class ADSL_ReasoningStep(BaseModel):
     """A single step in an agent's reasoning chain."""
 

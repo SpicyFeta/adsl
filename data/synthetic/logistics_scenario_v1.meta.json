@@ -1,0 +1,25 @@
+{
+  "dataset_id": "logistics_scenario_v1",
+  "version": "1.0",
+  "created": "2026-07-08",
+  "description": "Synthetic contested logistics scenario for ADSL Phase 1 MVP development and stress testing.",
+  "region": "Kessari Strait (fictional)",
+  "counts": {
+    "logistics_nodes": 10,
+    "logistics_routes": 18,
+    "blue_force_elements": 7,
+    "red_force_elements": 4
+  },
+  "phase1_defaults": {
+    "max_ticks": 100,
+    "turn_order": ["RED", "BLUE"]
+  },
+  "data_file": "logistics_scenario_v1.json",
+  "schema_models": [
+    "ADSL_Scenario",
+    "ADSL_LogisticsNode",
+    "ADSL_LogisticsRoute",
+    "ADSL_ForceElement",
+    "ADSL_ScenarioPackage"
+  ]
+}
