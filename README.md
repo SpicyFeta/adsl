@@ -119,12 +119,12 @@ docker compose run --rm adsl pytest
 |------|--------|
 | Project scaffolding | Complete |
 | Core dependencies | Configured (pydantic, structlog, pytest, pytest-cov) |
-| Agent logic | Red interdiction agent complete; Blue placeholder only |
+| Agent logic | Red interdiction + Blue logistics adaptation agents complete |
 | Simulation engine | Skeleton complete (`engine.py`, tick loop, trace recording) |
 | Synthetic datasets | `logistics_scenario_v1.json` (10 nodes, 18 routes, 7 Blue / 4 Red) |
 | Explainability / AuditTrace | Not started |
 | Palantir Ontology integration | Not started |
-| ADRs | ADR-001–004 recorded (004 orchestration, proposed) |
+| ADRs | ADR-001–005 recorded (005 Blue adaptation, proposed) |
 | Data models | `src/adsl/models.py` — initial Pydantic schemas |
 | Agent base class | `src/adsl/agents/base.py` — perceive/decide/act contract |
 

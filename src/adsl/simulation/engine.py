@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 
 from adsl.agents.base import Agent
-from adsl.agents.placeholders import PlaceholderBlueAgent
+from adsl.agents.blue_logistics import build_blue_agent
 from adsl.agents.red_interdiction import build_red_agent
 from adsl.models import (
     Action,
@@ -160,7 +160,7 @@ class SimulationEngine:
         )
         if element.side == AgentSide.RED:
             return build_red_agent(identity, force_element=element)
-        return PlaceholderBlueAgent(identity)
+        return build_blue_agent(identity, force_element=element)
 
     def _execute_tick(self, tick: int) -> None:
         assert self._run is not None
@@ -200,7 +200,9 @@ class SimulationEngine:
             },
         )
 
-        self._apply_action(action, tick, agent.identity.agent_id)
+        self._apply_action(
+            action, tick, agent.identity.agent_id, agent_side=agent.identity.side
+        )
         self._log.info(
             "agent_decision_recorded",
             run_id=self._run.run_id,
@@ -233,7 +235,14 @@ class SimulationEngine:
             context=context,
         )
 
-    def _apply_action(self, action: Action, tick: int, agent_id: str) -> None:
+    def _apply_action(
+        self,
+        action: Action,
+        tick: int,
+        agent_id: str,
+        *,
+        agent_side: AgentSide | None = None,
+    ) -> None:
         """Apply action to simulation state per ADR-004 semantics."""
         assert self._run is not None
 
@@ -242,11 +251,18 @@ class SimulationEngine:
             applied = self._apply_attack_route(action.target_id)
         elif action.action_type == ActionType.ATTACK_NODE and action.target_id:
             applied = self._apply_attack_node(action.target_id)
+        elif action.action_type == ActionType.HARDEN and action.target_id:
+            applied = self._apply_harden(action.target_id)
+        elif action.action_type == ActionType.REROUTE and action.target_id:
+            applied = self._apply_reroute(action)
+        elif action.action_type == ActionType.REALLOCATE and action.target_id:
+            applied = self._apply_reallocate(action)
 
         self._record_event(
             SimulationEventType.ACTION_RECORDED,
             tick=tick,
             agent_id=agent_id,
+            agent_side=agent_side,
             payload={
                 "action_type": action.action_type.value,
                 "target_id": action.target_id,
@@ -289,6 +305,73 @@ class SimulationEngine:
                 return True
             return False
         return False
+
+    def _apply_harden(self, route_id: str) -> bool:
+        for route in self._routes:
+            if route.route_id != route_id:
+                continue
+            if route.status == RouteStatus.CONTESTED:
+                route.status = RouteStatus.OPEN
+                route.metadata["hardened"] = True
+                return True
+            return False
+        return False
+
+    def _apply_reroute(self, action: Action) -> bool:
+        from_route_id = action.parameters.get("from_route_id")
+        to_route_id = action.target_id
+        if not from_route_id or not to_route_id:
+            return False
+
+        from_route = next(
+            (route for route in self._routes if route.route_id == from_route_id), None
+        )
+        to_route = next(
+            (route for route in self._routes if route.route_id == to_route_id), None
+        )
+        if from_route is None or to_route is None:
+            return False
+        if to_route.status != RouteStatus.OPEN:
+            return False
+
+        from_route.metadata["bypassed"] = True
+        to_route.metadata["reroute_from"] = from_route_id
+        to_route.metadata["active_reroute"] = True
+        return True
+
+    def _apply_reallocate(self, action: Action) -> bool:
+        from_node_id = action.parameters.get("from_node_id")
+        to_node_id = action.target_id
+        transfer = action.parameters.get("transfer_amount", 0.0)
+        if not from_node_id or not to_node_id or transfer <= 0:
+            return False
+
+        from_node = next(
+            (node for node in self._nodes if node.node_id == from_node_id), None
+        )
+        to_node = next(
+            (node for node in self._nodes if node.node_id == to_node_id), None
+        )
+        if from_node is None or to_node is None:
+            return False
+
+        amount = min(
+            float(transfer),
+            from_node.current_load,
+            to_node.capacity - to_node.current_load,
+        )
+        if amount <= 0:
+            return False
+
+        from_node.current_load -= amount
+        to_node.current_load += amount
+        from_node.metadata["reallocated_out"] = (
+            from_node.metadata.get("reallocated_out", 0.0) + amount
+        )
+        to_node.metadata["reallocated_in"] = (
+            to_node.metadata.get("reallocated_in", 0.0) + amount
+        )
+        return True
 
     def _record_audit_trace(self, trace: ADSL_AuditTrace) -> None:
         assert self._run is not None

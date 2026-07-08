@@ -30,6 +30,7 @@ def build_force_element_context(element: ADSL_ForceElement) -> dict:
         "unit_type": element.metadata.get("unit_type"),
         "capability": element.metadata.get("capability"),
         "priority_target": element.metadata.get("priority_target"),
+        "priority_mission": element.metadata.get("priority_mission"),
     }
 
 

@@ -1,6 +1,6 @@
 # ADR-004: Simulation Orchestration Policy (Tick Order, Fog-of-War, Red-Before-Blue)
 
-**Status:** Proposed  
+**Status:** Accepted
 **Date:** 2026-07-08  
 **Deciders:** ADSL Engineering Team, Project Management  
 **Phase:** Phase 1 — Contested Logistics Stress Test MVP
