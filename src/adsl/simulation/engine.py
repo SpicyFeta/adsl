@@ -6,9 +6,11 @@ from copy import deepcopy
 from datetime import datetime, timezone
 
 from adsl.agents.base import Agent
-from adsl.agents.placeholders import build_placeholder_agent
+from adsl.agents.placeholders import PlaceholderBlueAgent
+from adsl.agents.red_interdiction import build_red_agent
 from adsl.models import (
     Action,
+    ActionType,
     ADSL_AuditTrace,
     ADSL_ForceElement,
     ADSL_LogisticsNode,
@@ -18,10 +20,18 @@ from adsl.models import (
     ADSL_SimulationRun,
     AgentIdentity,
     AgentSide,
+    NodeStatus,
     Observation,
+    RouteStatus,
     SimulationEvent,
     SimulationEventType,
     SimulationStatus,
+)
+from adsl.simulation.orchestration import (
+    build_force_element_context,
+    sort_force_elements,
+    visible_nodes_for_side,
+    visible_routes_for_side,
 )
 from adsl.utils.logging import configure_logging, get_logger
 
@@ -30,7 +40,7 @@ DEFAULT_MAX_TICKS = 100
 
 class SimulationEngine:
     """
-    Tick-based simulation engine.
+    Tick-based simulation engine (ADR-004).
 
     Orchestrates Red-then-Blue agent turns per tick, builds observations,
     records events and audit traces, and emits structured logs.
@@ -51,8 +61,8 @@ class SimulationEngine:
 
         self._nodes: list[ADSL_LogisticsNode] = []
         self._routes: list[ADSL_LogisticsRoute] = []
-        self._red_agents: list[Agent] = []
-        self._blue_agents: list[Agent] = []
+        self._red_agents: list[tuple[Agent, ADSL_ForceElement]] = []
+        self._blue_agents: list[tuple[Agent, ADSL_ForceElement]] = []
         self._run: ADSL_SimulationRun | None = None
         self._events: list[SimulationEvent] = []
         self._audit_traces: list[ADSL_AuditTrace] = []
@@ -69,6 +79,14 @@ class SimulationEngine:
     def audit_traces(self) -> list[ADSL_AuditTrace]:
         return list(self._audit_traces)
 
+    @property
+    def nodes(self) -> list[ADSL_LogisticsNode]:
+        return deepcopy(self._nodes)
+
+    @property
+    def routes(self) -> list[ADSL_LogisticsRoute]:
+        return deepcopy(self._routes)
+
     def run_scenario(self, scenario: ADSL_ScenarioPackage | ADSL_Scenario) -> ADSL_SimulationRun:
         """Execute a scenario package (or bare scenario with no force elements)."""
         package = self._coerce_scenario_package(scenario)
@@ -76,6 +94,7 @@ class SimulationEngine:
         self._initialize_state(package)
         self._initialize_agents(package)
 
+        assert self._run is not None
         self._log.info(
             "simulation_run_started",
             run_id=self._run.run_id,
@@ -125,12 +144,12 @@ class SimulationEngine:
 
     def _initialize_agents(self, package: ADSL_ScenarioPackage) -> None:
         self._red_agents = [
-            self._agent_from_force_element(element)
-            for element in package.red_force_elements
+            (self._agent_from_force_element(element), element)
+            for element in sort_force_elements(package.red_force_elements)
         ]
         self._blue_agents = [
-            self._agent_from_force_element(element)
-            for element in package.blue_force_elements
+            (self._agent_from_force_element(element), element)
+            for element in sort_force_elements(package.blue_force_elements)
         ]
 
     def _agent_from_force_element(self, element: ADSL_ForceElement) -> Agent:
@@ -139,7 +158,9 @@ class SimulationEngine:
             side=element.side,
             role=element.role,
         )
-        return build_placeholder_agent(identity)
+        if element.side == AgentSide.RED:
+            return build_red_agent(identity, force_element=element)
+        return PlaceholderBlueAgent(identity)
 
     def _execute_tick(self, tick: int) -> None:
         assert self._run is not None
@@ -147,19 +168,21 @@ class SimulationEngine:
         self._log.info("tick_started", run_id=self._run.run_id, tick=tick)
         self._record_event(SimulationEventType.TICK_START, tick=tick)
 
-        for agent in self._red_agents:
-            self._execute_agent_turn(agent, tick)
+        for agent, element in self._red_agents:
+            self._execute_agent_turn(agent, element, tick)
 
-        for agent in self._blue_agents:
-            self._execute_agent_turn(agent, tick)
+        for agent, element in self._blue_agents:
+            self._execute_agent_turn(agent, element, tick)
 
         self._log.info("tick_completed", run_id=self._run.run_id, tick=tick)
         self._record_event(SimulationEventType.TICK_END, tick=tick)
 
-    def _execute_agent_turn(self, agent: Agent, tick: int) -> None:
+    def _execute_agent_turn(
+        self, agent: Agent, element: ADSL_ForceElement, tick: int
+    ) -> None:
         assert self._run is not None
 
-        observation = self._build_observation(agent, tick)
+        observation = self._build_observation(agent, element, tick)
         decision = agent.run_turn(observation)
         action = decision.action
 
@@ -188,41 +211,37 @@ class SimulationEngine:
             action_type=action.action_type.value,
         )
 
-    def _build_observation(self, agent: Agent, tick: int) -> Observation:
+    def _build_observation(
+        self, agent: Agent, element: ADSL_ForceElement, tick: int
+    ) -> Observation:
         assert self._run is not None
 
-        visible_nodes = self._visible_nodes_for(agent.identity.side)
-        visible_routes = self._visible_routes_for(agent.identity.side)
+        side = agent.identity.side
+        context = {
+            "seed": self._seed,
+            "scenario_id": self._run.scenario_id,
+            **build_force_element_context(element),
+        }
 
         return Observation(
             run_id=self._run.run_id,
             simulation_tick=tick,
             agent_id=agent.identity.agent_id,
-            agent_side=agent.identity.side,
-            visible_nodes=visible_nodes,
-            visible_routes=visible_routes,
-            context={
-                "seed": self._seed,
-                "scenario_id": self._run.scenario_id,
-                "role": agent.identity.role,
-            },
+            agent_side=side,
+            visible_nodes=visible_nodes_for_side(side, self._nodes),
+            visible_routes=visible_routes_for_side(side, self._routes),
+            context=context,
         )
-
-    def _visible_nodes_for(self, side: AgentSide) -> list[ADSL_LogisticsNode]:
-        if side == AgentSide.RED:
-            return deepcopy(self._nodes)
-        return deepcopy(
-            [node for node in self._nodes if node.status.value != "DESTROYED"]
-        )
-
-    def _visible_routes_for(self, side: AgentSide) -> list[ADSL_LogisticsRoute]:
-        if side == AgentSide.RED:
-            return deepcopy(self._routes)
-        return deepcopy(self._routes)
 
     def _apply_action(self, action: Action, tick: int, agent_id: str) -> None:
-        """Record action application. Full state mutation deferred to later phases."""
+        """Apply action to simulation state per ADR-004 semantics."""
         assert self._run is not None
+
+        applied = False
+        if action.action_type == ActionType.ATTACK_ROUTE and action.target_id:
+            applied = self._apply_attack_route(action.target_id)
+        elif action.action_type == ActionType.ATTACK_NODE and action.target_id:
+            applied = self._apply_attack_node(action.target_id)
 
         self._record_event(
             SimulationEventType.ACTION_RECORDED,
@@ -232,6 +251,7 @@ class SimulationEngine:
                 "action_type": action.action_type.value,
                 "target_id": action.target_id,
                 "parameters": action.parameters,
+                "applied": applied,
             },
         )
         self._log.info(
@@ -241,7 +261,34 @@ class SimulationEngine:
             agent_id=agent_id,
             action_type=action.action_type.value,
             target_id=action.target_id,
+            applied=applied,
         )
+
+    def _apply_attack_route(self, route_id: str) -> bool:
+        for route in self._routes:
+            if route.route_id != route_id:
+                continue
+            if route.status == RouteStatus.OPEN:
+                route.status = RouteStatus.CONTESTED
+                return True
+            if route.status == RouteStatus.CONTESTED:
+                route.status = RouteStatus.CLOSED
+                return True
+            return False
+        return False
+
+    def _apply_attack_node(self, node_id: str) -> bool:
+        for node in self._nodes:
+            if node.node_id != node_id:
+                continue
+            if node.status == NodeStatus.OPERATIONAL:
+                node.status = NodeStatus.DEGRADED
+                return True
+            if node.status == NodeStatus.DEGRADED:
+                node.status = NodeStatus.DESTROYED
+                return True
+            return False
+        return False
 
     def _record_audit_trace(self, trace: ADSL_AuditTrace) -> None:
         assert self._run is not None
