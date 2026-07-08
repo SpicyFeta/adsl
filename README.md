@@ -124,7 +124,7 @@ docker compose run --rm adsl pytest
 | Explainability / AuditTrace | Not started |
 | Palantir Ontology integration | Not started |
 | Synthetic datasets | Not started |
-| ADRs | ADR-001 (Python language) recorded |
+| ADRs | ADR-001 (Python language), ADR-002 (custom agent system) recorded |
 
 **Phase 1 progress:** Initialization complete. Awaiting next directive.
 
