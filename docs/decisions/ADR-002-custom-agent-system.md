@@ -51,7 +51,7 @@ All Red and Blue agents must implement the following contract. This is the stabl
 | `Observation` | Read-only view of simulation state visible to the agent at decision time |
 | `Action` | Validated, typed intent the agent wishes to execute |
 | `DecisionResult` | The chosen `Action` plus a mandatory `AuditTrace` |
-| `AuditTrace` | Structured reasoning record (see ADR-003, forthcoming) |
+| `AuditTrace` | Structured reasoning record (`ADSL_AuditTrace`; see ADR-003) |
 
 ### Interface
 
@@ -186,4 +186,5 @@ Deterministic `decide()` contracts enable unit tests with fixed observations, pr
 - ADR-001: Python 3.11+ as Primary Implementation Language
 - ADSL Phase 1 Project Charter — Non-Negotiable Constraints (explainability, no heavy frameworks)
 - `src/adsl/agents/` — agent implementations (forthcoming)
-- `src/adsl/explainability/` — AuditTrace system (forthcoming; ADR-003)
+- ADR-003: AuditTrace System and Explainability Contract
+- `src/adsl/explainability/` — AuditTrace generation helpers
