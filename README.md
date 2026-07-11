@@ -1,10 +1,31 @@
 # ADSL — Agent-Based Decision Support for Logistics
 
-**ADSL** is a professional-grade agent-based simulation and analytics platform designed for **contested and high-risk logistics environments**. It enables defense organizations, enterprises, and analysts to model, stress-test, and optimize supply chains under disruption, adversarial pressure, and dynamic conditions.
+**ADSL** is a professional-grade, agent-based simulation and analytics platform built specifically for **contested and high-risk logistics environments**.
+
+It enables defense organizations, enterprises, and analysts to model, stress-test, and optimize supply chains under disruption, adversarial pressure, and dynamic conditions — where traditional tools break down.
 
 ## Why ADSL?
 
-Traditional logistics tools assume stable conditions. ADSL is built for reality — where routes can be attacked, decisions must be made under uncertainty, and resilience matters more than optimization alone.
+Most logistics and decision-support tools assume stable, predictable environments. ADSL is designed for reality:
+
+- Routes can be contested or attacked
+- Decisions must be made under uncertainty
+- Resilience and adaptability matter more than pure optimization
+
+ADSL combines **agent-based simulation**, **advanced analytics**, and a **self-governing architecture** to deliver explainable, auditable decision support in the most demanding conditions.
+
+## Why ADSL vs Other Solutions?
+
+| Aspect                        | Traditional Logistics Tools | General AI Agent Frameworks | **ADSL**                                      |
+|-------------------------------|-----------------------------|-----------------------------|-----------------------------------------------|
+| **Focus**                     | Stable environments         | General-purpose agents      | **Contested & high-risk logistics**           |
+| **Simulation Fidelity**       | Low                         | Variable                    | **High-fidelity agent interactions**          |
+| **Analytics Depth**           | Basic                       | Limited                     | **Built-in risk scoring + bottleneck detection** |
+| **Decision Traceability**     | Weak                        | Improving                   | **Strong (every decision is explainable)**    |
+| **Self-Governance**           | None                        | Rare                        | **Constitutional self-improving architecture** |
+| **Enterprise / Defense Ready**| Moderate                    | Low                         | **Designed for Palantir + defense workflows** |
+
+ADSL is not another general agent framework. It is purpose-built for organizations that operate where failure is not an option.
 
 ## Key Features
 
@@ -12,13 +33,12 @@ Traditional logistics tools assume stable conditions. ADSL is built for reality 
 - **Contested Environment Modeling** — Simulate bottlenecks, disruptions, adaptive rerouting, and cascading failures
 - **Advanced Analytics Engine** — Automatic risk scoring, bottleneck detection, focus area identification, and scenario comparison
 - **Decision Traceability** — Every agent decision is explainable and auditable
-- **Scenario Comparison** — Run and compare multiple scenarios with clear metrics and recommendations
-- **Self-Governing Architecture** — Built on a constitutional foundation for long-term reliability and evolution
+- **Self-Governing Architecture** — Constitutional foundation for long-term reliability and controlled evolution
 - **Palantir Integration Ready** — Designed with Foundry and ontology integration in mind
 
-## Try the Demo
+## Try the Demo (Recommended)
 
-The fastest way to experience ADSL:
+Experience ADSL in under 2 minutes:
 
 ```bash
 git clone https://github.com/SpicyFeta/adsl.git
@@ -27,11 +47,11 @@ pip install streamlit pandas
 streamlit run demo/streamlit_demo.py
 ```
 
-The demo showcases scenario comparison, risk metrics, and actionable recommendations in a clean enterprise-style interface.
+The demo includes scenario comparison, risk metrics, bottlenecks, and actionable recommendations in a clean enterprise-style interface.
 
 ## Visual Overview
 
-### Main Dashboard & Live Operations View
+### Main Dashboard & Live Operations
 ![Main Dashboard](screenshots/wH4PZ.jpg)
 
 ### Analytics & Risk Dashboard
@@ -46,16 +66,17 @@ The demo showcases scenario comparison, risk metrics, and actionable recommendat
 - Supply chain resilience and risk analysis for critical infrastructure
 - Wargaming and scenario-based decision support
 - Defense analytics and operational research
-- Enterprise risk modeling in unstable environments
+- Enterprise risk modeling in unstable or adversarial environments
 
 ## Project Status
 
-ADSL is under active development. The core simulation engine, analytics modules, and self-governing architecture are mature. A production-grade interface and deeper Palantir Foundry integration are in progress.
+ADSL is under active development. The core simulation engine, analytics modules, and self-governing architecture are mature.
 
-Current focus:
+**Current priorities:**
 - Hardening simulation fidelity
 - Expanding analytics depth
-- Improving demo experience
+- Improving demo and documentation experience
+- Deepening Palantir Foundry integration
 
 ## Getting Started (Full Platform)
 
@@ -67,7 +88,7 @@ pip install -r requirements.txt
 
 ## Contributing
 
-We welcome contributions from researchers, defense technologists, and engineers. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome from researchers, defense technologists, and engineers. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
