@@ -1,0 +1,541 @@
+{
+  "scenario": {
+    "scenario_id": "island-chokepoint-v2",
+    "name": "Coral Atoll Island Chokepoint",
+    "description": "An island logistics network connected to a mainland port through two contested chokepoint corridors. Red interdiction focuses on strait crossings and coastal supply routes while Blue sustains FOB resupply through redundant hub-and-spoke paths designed for longer demo runs.",
+    "metadata": {
+      "theater": "Coral Atoll Exclusion Zone",
+      "duration_days": 21,
+      "contestation_level": "moderate",
+      "primary_objective": "Maintain FOB supply through chokepoint corridors under sustained interdiction",
+      "topology": "island_chokepoint"
+    },
+    "nodes": [
+      {
+        "node_id": "N-MAINLAND-PORT",
+        "name": "Mainland Consolidation Port",
+        "node_type": "PORT",
+        "latitude": 12.58,
+        "longitude": 144.82,
+        "capacity": 600.0,
+        "current_load": 480.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "critical",
+          "hardening_level": "high",
+          "throughput_tons_per_day": 600
+        }
+      },
+      {
+        "node_id": "N-ISLAND-PORT",
+        "name": "Coral Atoll Reception Port",
+        "node_type": "PORT",
+        "latitude": 13.42,
+        "longitude": 145.18,
+        "capacity": 420.0,
+        "current_load": 340.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "hardening_level": "medium",
+          "throughput_tons_per_day": 420
+        }
+      },
+      {
+        "node_id": "N-STRAIT-HUB",
+        "name": "Strait Transit Control Hub",
+        "node_type": "HUB",
+        "latitude": 13.12,
+        "longitude": 145.02,
+        "capacity": 300.0,
+        "current_load": 245.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "routing_priority": 1,
+          "chokepoint": true
+        }
+      },
+      {
+        "node_id": "N-NORTH-DEPOT",
+        "name": "North Island Supply Depot",
+        "node_type": "DEPOT",
+        "latitude": 13.55,
+        "longitude": 145.22,
+        "capacity": 280.0,
+        "current_load": 210.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "commodity_mix": ["fuel", "ammunition", "rations"],
+          "hardening_level": "medium"
+        }
+      },
+      {
+        "node_id": "N-SOUTH-DEPOT",
+        "name": "South Island Supply Depot",
+        "node_type": "DEPOT",
+        "latitude": 13.28,
+        "longitude": 145.35,
+        "capacity": 240.0,
+        "current_load": 185.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "commodity_mix": ["ammunition", "spare_parts"],
+          "hardening_level": "medium"
+        }
+      },
+      {
+        "node_id": "N-EAST-HUB",
+        "name": "Eastern Distribution Hub",
+        "node_type": "HUB",
+        "latitude": 13.38,
+        "longitude": 145.48,
+        "capacity": 220.0,
+        "current_load": 170.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "routing_priority": 2
+        }
+      },
+      {
+        "node_id": "N-WEST-HUB",
+        "name": "Western Relay Hub",
+        "node_type": "HUB",
+        "latitude": 13.35,
+        "longitude": 144.95,
+        "capacity": 200.0,
+        "current_load": 155.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "routing_priority": 3
+        }
+      },
+      {
+        "node_id": "N-FOB-LITTORAL",
+        "name": "FOB Littoral Watch",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 13.48,
+        "longitude": 145.52,
+        "capacity": 110.0,
+        "current_load": 82.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "daily_consumption": 14.0,
+          "days_of_supply": 5.8
+        }
+      },
+      {
+        "node_id": "N-FOB-INTERIOR",
+        "name": "FOB Interior Redoubt",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 13.22,
+        "longitude": 145.42,
+        "capacity": 95.0,
+        "current_load": 70.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "daily_consumption": 12.0,
+          "days_of_supply": 5.8
+        }
+      },
+      {
+        "node_id": "N-RELAY-NORTH",
+        "name": "North Shore Relay Station",
+        "node_type": "HUB",
+        "latitude": 13.52,
+        "longitude": 145.08,
+        "capacity": 150.0,
+        "current_load": 105.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "low",
+          "routing_priority": 4
+        }
+      },
+      {
+        "node_id": "N-RELAY-SOUTH",
+        "name": "South Shore Relay Station",
+        "node_type": "HUB",
+        "latitude": 13.18,
+        "longitude": 145.12,
+        "capacity": 140.0,
+        "current_load": 98.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "low",
+          "routing_priority": 5
+        }
+      },
+      {
+        "node_id": "N-MED-CACHE",
+        "name": "Medical Cache Point",
+        "node_type": "DEPOT",
+        "latitude": 13.40,
+        "longitude": 145.28,
+        "capacity": 80.0,
+        "current_load": 52.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "commodity_mix": ["medical", "pharmaceuticals"],
+          "hardening_level": "low"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "route_id": "R-CHOKE-01",
+        "name": "Mainland to Strait Hub (Primary Choke)",
+        "source_node_id": "N-MAINLAND-PORT",
+        "target_node_id": "N-STRAIT-HUB",
+        "capacity": 70.0,
+        "transit_time_hours": 8.0,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "high",
+          "terrain": "strait_ferry_corridor",
+          "distance_km": 95,
+          "chokepoint": true,
+          "threat_type": "coastal_interdiction"
+        }
+      },
+      {
+        "route_id": "R-CHOKE-02",
+        "name": "Strait Hub to Island Port (Secondary Choke)",
+        "source_node_id": "N-STRAIT-HUB",
+        "target_node_id": "N-ISLAND-PORT",
+        "capacity": 55.0,
+        "transit_time_hours": 4.0,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "high",
+          "terrain": "narrow_channel",
+          "distance_km": 38,
+          "chokepoint": true,
+          "threat_type": "missile_corridor"
+        }
+      },
+      {
+        "route_id": "R-INLAND-01",
+        "name": "Island Port to North Depot",
+        "source_node_id": "N-ISLAND-PORT",
+        "target_node_id": "N-NORTH-DEPOT",
+        "capacity": 50.0,
+        "transit_time_hours": 3.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "coastal_highway", "distance_km": 32 }
+      },
+      {
+        "route_id": "R-INLAND-02",
+        "name": "Island Port to South Depot",
+        "source_node_id": "N-ISLAND-PORT",
+        "target_node_id": "N-SOUTH-DEPOT",
+        "capacity": 45.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 36 }
+      },
+      {
+        "route_id": "R-INLAND-03",
+        "name": "North Depot to East Hub",
+        "source_node_id": "N-NORTH-DEPOT",
+        "target_node_id": "N-EAST-HUB",
+        "capacity": 40.0,
+        "transit_time_hours": 2.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 22 }
+      },
+      {
+        "route_id": "R-INLAND-04",
+        "name": "South Depot to West Hub",
+        "source_node_id": "N-SOUTH-DEPOT",
+        "target_node_id": "N-WEST-HUB",
+        "capacity": 38.0,
+        "transit_time_hours": 3.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "medium", "terrain": "valley_road", "distance_km": 28 }
+      },
+      {
+        "route_id": "R-INLAND-05",
+        "name": "East Hub to FOB Littoral",
+        "source_node_id": "N-EAST-HUB",
+        "target_node_id": "N-FOB-LITTORAL",
+        "capacity": 28.0,
+        "transit_time_hours": 3.5,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "coastal_track",
+          "distance_km": 24,
+          "threat_type": "raids"
+        }
+      },
+      {
+        "route_id": "R-INLAND-06",
+        "name": "West Hub to FOB Interior",
+        "source_node_id": "N-WEST-HUB",
+        "target_node_id": "N-FOB-INTERIOR",
+        "capacity": 26.0,
+        "transit_time_hours": 4.0,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "ridge_track",
+          "distance_km": 30,
+          "threat_type": "ambush"
+        }
+      },
+      {
+        "route_id": "R-ALT-01",
+        "name": "North Relay Bypass (Choke Alternate)",
+        "source_node_id": "N-MAINLAND-PORT",
+        "target_node_id": "N-RELAY-NORTH",
+        "capacity": 35.0,
+        "transit_time_hours": 10.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "open_water_detour",
+          "distance_km": 120,
+          "alternate_for": "R-CHOKE-01"
+        }
+      },
+      {
+        "route_id": "R-ALT-02",
+        "name": "North Relay to Island Port",
+        "source_node_id": "N-RELAY-NORTH",
+        "target_node_id": "N-ISLAND-PORT",
+        "capacity": 30.0,
+        "transit_time_hours": 5.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "medium", "terrain": "coastal_road", "distance_km": 42 }
+      },
+      {
+        "route_id": "R-ALT-03",
+        "name": "South Relay Bypass",
+        "source_node_id": "N-MAINLAND-PORT",
+        "target_node_id": "N-RELAY-SOUTH",
+        "capacity": 32.0,
+        "transit_time_hours": 11.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "open_water_detour",
+          "distance_km": 128,
+          "alternate_for": "R-CHOKE-01"
+        }
+      },
+      {
+        "route_id": "R-ALT-04",
+        "name": "South Relay to Strait Hub",
+        "source_node_id": "N-RELAY-SOUTH",
+        "target_node_id": "N-STRAIT-HUB",
+        "capacity": 28.0,
+        "transit_time_hours": 4.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "coastal_road", "distance_km": 35 }
+      },
+      {
+        "route_id": "R-MED-01",
+        "name": "Medical Cache to East Hub",
+        "source_node_id": "N-MED-CACHE",
+        "target_node_id": "N-EAST-HUB",
+        "capacity": 18.0,
+        "transit_time_hours": 2.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 14 }
+      },
+      {
+        "route_id": "R-MED-02",
+        "name": "North Depot to Medical Cache",
+        "source_node_id": "N-NORTH-DEPOT",
+        "target_node_id": "N-MED-CACHE",
+        "capacity": 20.0,
+        "transit_time_hours": 2.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 16 }
+      },
+      {
+        "route_id": "R-LINK-01",
+        "name": "East Hub to West Hub Lateral",
+        "source_node_id": "N-EAST-HUB",
+        "target_node_id": "N-WEST-HUB",
+        "capacity": 34.0,
+        "transit_time_hours": 3.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "low", "terrain": "paved_road", "distance_km": 26 }
+      },
+      {
+        "route_id": "R-LINK-02",
+        "name": "Strait Hub to West Hub",
+        "source_node_id": "N-STRAIT-HUB",
+        "target_node_id": "N-WEST-HUB",
+        "capacity": 36.0,
+        "transit_time_hours": 2.5,
+        "status": "OPEN",
+        "metadata": { "risk_level": "medium", "terrain": "coastal_road", "distance_km": 20 }
+      },
+      {
+        "route_id": "R-LINK-03",
+        "name": "FOB Littoral to FOB Interior",
+        "source_node_id": "N-FOB-LITTORAL",
+        "target_node_id": "N-FOB-INTERIOR",
+        "capacity": 16.0,
+        "transit_time_hours": 3.0,
+        "status": "OPEN",
+        "metadata": { "risk_level": "medium", "terrain": "interior_track", "distance_km": 22 }
+      },
+      {
+        "route_id": "R-CHOKE-03",
+        "name": "Strait Hub to East Hub",
+        "source_node_id": "N-STRAIT-HUB",
+        "target_node_id": "N-EAST-HUB",
+        "capacity": 42.0,
+        "transit_time_hours": 3.0,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "coastal_highway",
+          "distance_km": 28,
+          "threat_type": "uav_surveillance"
+        }
+      }
+    ]
+  },
+  "blue_force_elements": [
+    {
+      "element_id": "BLUE-LOG-01",
+      "name": "Strait Convoy Alpha",
+      "side": "BLUE",
+      "role": "LOGISTICS_MANAGER",
+      "home_node_id": "N-NORTH-DEPOT",
+      "patrol_route_ids": ["R-INLAND-01", "R-INLAND-03", "R-LINK-01"],
+      "readiness": 0.91,
+      "metadata": { "unit_type": "logistics_convoy", "vehicles": 10, "priority_mission": "chokepoint_sustainment" }
+    },
+    {
+      "element_id": "BLUE-LOG-02",
+      "name": "Island Distribution Bravo",
+      "side": "BLUE",
+      "role": "ROUTE_COORDINATOR",
+      "home_node_id": "N-ISLAND-PORT",
+      "patrol_route_ids": ["R-INLAND-02", "R-LINK-02", "R-ALT-02"],
+      "readiness": 0.89,
+      "metadata": { "unit_type": "logistics_convoy", "vehicles": 8, "priority_mission": "port_distribution" }
+    },
+    {
+      "element_id": "BLUE-SEC-01",
+      "name": "Chokepoint Security North",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-STRAIT-HUB",
+      "patrol_route_ids": ["R-CHOKE-01", "R-CHOKE-02"],
+      "readiness": 0.86,
+      "metadata": { "unit_type": "security_element", "personnel": 22, "priority_mission": "chokepoint_hardening" }
+    },
+    {
+      "element_id": "BLUE-SEC-02",
+      "name": "Chokepoint Security South",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-STRAIT-HUB",
+      "patrol_route_ids": ["R-CHOKE-03", "R-INLAND-05"],
+      "readiness": 0.84,
+      "metadata": { "unit_type": "security_element", "personnel": 20, "priority_mission": "corridor_patrol" }
+    },
+    {
+      "element_id": "BLUE-DEP-01",
+      "name": "South Depot Operations",
+      "side": "BLUE",
+      "role": "DEPOT_OPERATOR",
+      "home_node_id": "N-SOUTH-DEPOT",
+      "patrol_route_ids": ["R-INLAND-04", "R-INLAND-06"],
+      "readiness": 0.9,
+      "metadata": { "unit_type": "depot_cell", "personnel": 28, "priority_mission": "interior_resupply" }
+    },
+    {
+      "element_id": "BLUE-HUB-01",
+      "name": "East-West Flow Controller",
+      "side": "BLUE",
+      "role": "DISTRIBUTION_CONTROLLER",
+      "home_node_id": "N-EAST-HUB",
+      "patrol_route_ids": ["R-LINK-01", "R-LINK-03", "R-INLAND-05"],
+      "readiness": 0.93,
+      "metadata": { "unit_type": "hub_control", "personnel": 12, "priority_mission": "lateral_distribution" }
+    },
+    {
+      "element_id": "BLUE-MED-01",
+      "name": "Medical Logistics Cell",
+      "side": "BLUE",
+      "role": "MEDICAL_LOGISTICS",
+      "home_node_id": "N-MED-CACHE",
+      "patrol_route_ids": ["R-MED-01", "R-MED-02"],
+      "readiness": 0.95,
+      "metadata": { "unit_type": "medical_logistics", "personnel": 8, "priority_mission": "medical_continuity" }
+    }
+  ],
+  "red_force_elements": [
+    {
+      "element_id": "RED-STRIKE-01",
+      "name": "Chokepoint Interdiction Alpha",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-CHOKE-01", "R-CHOKE-02", "R-CHOKE-03"],
+      "readiness": 0.88,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "capability": "missile_strike",
+        "priority_target": "chokepoint_corridors"
+      }
+    },
+    {
+      "element_id": "RED-STRIKE-02",
+      "name": "Coastal Interdiction Bravo",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-INLAND-05", "R-INLAND-06", "R-ALT-01"],
+      "readiness": 0.83,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "capability": "raids",
+        "priority_target": "fob_supply_routes"
+      }
+    },
+    {
+      "element_id": "RED-STRIKE-03",
+      "name": "Bypass Hunter Charlie",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-ALT-02", "R-ALT-03", "R-ALT-04"],
+      "readiness": 0.8,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "capability": "naval_intercept",
+        "priority_target": "alternate_corridors"
+      }
+    },
+    {
+      "element_id": "RED-SIGINT-01",
+      "name": "Maritime SIGINT Detachment",
+      "side": "RED",
+      "role": "RECONNAISSANCE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-CHOKE-01", "R-ALT-01", "R-LINK-02"],
+      "readiness": 0.92,
+      "metadata": {
+        "unit_type": "sigint",
+        "capability": "movement_detection",
+        "priority_target": "convoy_timing"
+      }
+    }
+  ]
+}

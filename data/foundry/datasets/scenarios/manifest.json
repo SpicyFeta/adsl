@@ -1,0 +1,7 @@
+{
+  "dataset_schema_version": "1.0",
+  "dataset_key": "local:scenarios",
+  "record_count": 2,
+  "storage": "local_filesystem",
+  "path": "data\\foundry\\datasets\\scenarios\\records.jsonl"
+}

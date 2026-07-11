@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "benchmarks": {
+    "island-chokepoint-v2@100/seed=42": {
+      "max_elapsed_seconds": 0.219,
+      "ticks_per_second": 685.5,
+      "measured_elapsed_seconds": 0.146
+    },
+    "alpine-valley-v3@100/seed=42": {
+      "max_elapsed_seconds": 0.222,
+      "ticks_per_second": 673.4,
+      "measured_elapsed_seconds": 0.148
+    },
+    "continental-grid-scale-v4@150/seed=42": {
+      "max_elapsed_seconds": 0.4935,
+      "ticks_per_second": 455.6,
+      "measured_elapsed_seconds": 0.329
+    },
+    "continental-mega-scale-v5@200/seed=42": {
+      "max_elapsed_seconds": 1.296,
+      "ticks_per_second": 231.6,
+      "measured_elapsed_seconds": 0.864
+    }
+  }
+}

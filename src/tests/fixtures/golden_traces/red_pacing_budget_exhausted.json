@@ -1,0 +1,7 @@
+{
+  "hold": {
+    "action_summary": "Hold — strike budget exhausted",
+    "strike_budget_remaining": 0,
+    "pacing_hold_reason": "strike_budget_exhausted"
+  }
+}

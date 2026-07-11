@@ -1,3 +1,7 @@
+# Copyright (c) 2026 Apostolos Kalogritsas
+# Licensed under the MIT License.
+# See the LICENSE file in the project root for full license information.
+
 """Blue logistics adaptation agent — policy-driven response to Red damage."""
 
 from __future__ import annotations
@@ -83,8 +87,12 @@ class BlueLogisticsAgent(Agent):
         self._priority_mission = context.get("priority_mission", self._priority_mission)
 
     def decide(self, observation: Observation) -> DecisionResult:
-        routes_by_id = {route.route_id: route for route in observation.visible_routes}
-        nodes_by_id = {node.node_id: node for node in observation.visible_nodes}
+        routes_by_id = observation.context.get("routes_by_id") or {
+            route.route_id: route for route in observation.visible_routes
+        }
+        nodes_by_id = observation.context.get("nodes_by_id") or {
+            node.node_id: node for node in observation.visible_nodes
+        }
         patrol_routes = [
             routes_by_id[route_id]
             for route_id in sorted(self._patrol_route_ids)
@@ -106,7 +114,14 @@ class BlueLogisticsAgent(Agent):
             ),
         }
 
-        p1 = self._evaluate_p1_reroute_closed(patrol_routes, observation.visible_routes)
+        route_indexes = (
+            observation.context.get("routes_by_source"),
+            observation.context.get("routes_by_target"),
+        )
+
+        p1 = self._evaluate_p1_reroute_closed(
+            patrol_routes, observation.visible_routes, route_indexes=route_indexes
+        )
         if p1 is not None:
             return self._build_reroute_result(observation, inputs_base, p1, policy_rule="P1")
 
@@ -114,7 +129,9 @@ class BlueLogisticsAgent(Agent):
         if p2 is not None:
             return self._build_harden_result(observation, inputs_base, p2, policy_rule="P2")
 
-        p3 = self._evaluate_p3_reroute_contested(patrol_routes, observation.visible_routes)
+        p3 = self._evaluate_p3_reroute_contested(
+            patrol_routes, observation.visible_routes, route_indexes=route_indexes
+        )
         if p3 is not None:
             return self._build_reroute_result(observation, inputs_base, p3, policy_rule="P3")
 
@@ -142,11 +159,22 @@ class BlueLogisticsAgent(Agent):
         self,
         patrol_routes: list[ADSL_LogisticsRoute],
         all_routes: list[ADSL_LogisticsRoute],
+        *,
+        route_indexes: tuple[
+            dict[str, list[ADSL_LogisticsRoute]] | None,
+            dict[str, list[ADSL_LogisticsRoute]] | None,
+        ] = (None, None),
     ) -> dict | None:
+        routes_by_source, routes_by_target = route_indexes
         for route in patrol_routes:
             if route.status != RouteStatus.CLOSED:
                 continue
-            alternate = self._find_alternate_route(route, all_routes)
+            alternate = self._find_alternate_route(
+                route,
+                all_routes,
+                routes_by_source=routes_by_source,
+                routes_by_target=routes_by_target,
+            )
             if alternate is not None:
                 return {"from_route": route, "to_route": alternate}
         return None
@@ -165,13 +193,24 @@ class BlueLogisticsAgent(Agent):
         self,
         patrol_routes: list[ADSL_LogisticsRoute],
         all_routes: list[ADSL_LogisticsRoute],
+        *,
+        route_indexes: tuple[
+            dict[str, list[ADSL_LogisticsRoute]] | None,
+            dict[str, list[ADSL_LogisticsRoute]] | None,
+        ] = (None, None),
     ) -> dict | None:
         if self.identity.role not in REROUTE_ROLES:
             return None
+        routes_by_source, routes_by_target = route_indexes
         for route in patrol_routes:
             if route.status != RouteStatus.CONTESTED:
                 continue
-            alternate = self._find_alternate_route(route, all_routes)
+            alternate = self._find_alternate_route(
+                route,
+                all_routes,
+                routes_by_source=routes_by_source,
+                routes_by_target=routes_by_target,
+            )
             if alternate is not None:
                 return {"from_route": route, "to_route": alternate}
         return None
@@ -223,7 +262,26 @@ class BlueLogisticsAgent(Agent):
         self,
         disrupted: ADSL_LogisticsRoute,
         all_routes: list[ADSL_LogisticsRoute],
+        *,
+        routes_by_source: dict[str, list[ADSL_LogisticsRoute]] | None = None,
+        routes_by_target: dict[str, list[ADSL_LogisticsRoute]] | None = None,
     ) -> ADSL_LogisticsRoute | None:
+        if routes_by_source is not None and routes_by_target is not None:
+            seen: set[str] = set()
+            alternates: list[ADSL_LogisticsRoute] = []
+            for candidate in (
+                routes_by_source.get(disrupted.source_node_id, [])
+                + routes_by_target.get(disrupted.target_node_id, [])
+            ):
+                if candidate.route_id == disrupted.route_id or candidate.route_id in seen:
+                    continue
+                if candidate.status != RouteStatus.OPEN:
+                    continue
+                seen.add(candidate.route_id)
+                alternates.append(candidate)
+            alternates.sort(key=lambda route: route.route_id)
+            return alternates[0] if alternates else None
+
         alternates = [
             route
             for route in all_routes
@@ -402,8 +460,8 @@ class BlueLogisticsAgent(Agent):
                 f"{policy_rule}: security element hardening contested patrol route {route.route_id}.",
             )
             .add_reasoning_step(
-                "Applying corridor hardening to restore route viability per ADR-005.",
-                evidence={"route_status": route.status.value},
+                "ADR-008: applying harden_level=1; first subsequent route attack will be absorbed.",
+                evidence={"route_status": route.status.value, "policy": "ADR-008"},
             )
             .with_action(
                 ActionType.HARDEN,

@@ -1,3 +1,7 @@
+# Copyright (c) 2026 Apostolos Kalogritsas
+# Licensed under the MIT License.
+# See the LICENSE file in the project root for full license information.
+
 """Core simulation engine for ADSL Phase 1."""
 
 from __future__ import annotations
@@ -27,15 +31,21 @@ from adsl.models import (
     SimulationEventType,
     SimulationStatus,
 )
+from adsl.simulation.deconfliction import (
+    SUPPRESSION_REASON,
+    TickTargetRegistry,
+)
+from adsl.simulation.hardening import apply_attack_route, apply_harden
+from adsl.performance.config import DEFAULT_MAX_TICKS, SCALE_MAX_TICKS
+from adsl.performance.network_index import NetworkIndex  # noqa: F401 — re-export path
+from adsl.simulation.observation_cache import SideObservationCache, build_side_observation_cache
 from adsl.simulation.orchestration import (
     build_force_element_context,
+    snapshot_nodes,
+    snapshot_routes,
     sort_force_elements,
-    visible_nodes_for_side,
-    visible_routes_for_side,
 )
 from adsl.utils.logging import configure_logging, get_logger
-
-DEFAULT_MAX_TICKS = 100
 
 
 class SimulationEngine:
@@ -46,26 +56,39 @@ class SimulationEngine:
     records events and audit traces, and emits structured logs.
     """
 
-    def __init__(self, *, max_ticks: int = DEFAULT_MAX_TICKS, seed: int = 0) -> None:
+    def __init__(
+        self,
+        *,
+        max_ticks: int = DEFAULT_MAX_TICKS,
+        seed: int = 0,
+        quiet_logs: bool = False,
+        scale_mode: bool = False,
+    ) -> None:
         if max_ticks < 1:
             raise ValueError("max_ticks must be at least 1.")
-        if max_ticks > DEFAULT_MAX_TICKS:
+        tick_cap = SCALE_MAX_TICKS if scale_mode else DEFAULT_MAX_TICKS
+        if max_ticks > tick_cap:
             raise ValueError(
-                f"Phase 1 supports at most {DEFAULT_MAX_TICKS} ticks; got {max_ticks}."
+                f"ADSL supports at most {tick_cap} ticks"
+                f"{' in scale mode' if scale_mode else ''}; got {max_ticks}."
             )
 
-        configure_logging()
+        configure_logging(quiet=quiet_logs)
         self._log = get_logger("adsl.simulation.engine")
+        self._emit_logs = not quiet_logs
         self._max_ticks = max_ticks
         self._seed = seed
+        self._scale_mode = scale_mode
 
         self._nodes: list[ADSL_LogisticsNode] = []
         self._routes: list[ADSL_LogisticsRoute] = []
+        self._network_index = NetworkIndex([], [])
         self._red_agents: list[tuple[Agent, ADSL_ForceElement]] = []
         self._blue_agents: list[tuple[Agent, ADSL_ForceElement]] = []
         self._run: ADSL_SimulationRun | None = None
         self._events: list[SimulationEvent] = []
         self._audit_traces: list[ADSL_AuditTrace] = []
+        self._tick_targets = TickTargetRegistry()
 
     @property
     def run(self) -> ADSL_SimulationRun | None:
@@ -81,11 +104,11 @@ class SimulationEngine:
 
     @property
     def nodes(self) -> list[ADSL_LogisticsNode]:
-        return deepcopy(self._nodes)
+        return snapshot_nodes(self._nodes)
 
     @property
     def routes(self) -> list[ADSL_LogisticsRoute]:
-        return deepcopy(self._routes)
+        return snapshot_routes(self._routes)
 
     def run_scenario(self, scenario: ADSL_ScenarioPackage | ADSL_Scenario) -> ADSL_SimulationRun:
         """Execute a scenario package (or bare scenario with no force elements)."""
@@ -95,14 +118,15 @@ class SimulationEngine:
         self._initialize_agents(package)
 
         assert self._run is not None
-        self._log.info(
-            "simulation_run_started",
-            run_id=self._run.run_id,
-            scenario_id=package.scenario.scenario_id,
-            max_ticks=self._max_ticks,
-            red_agents=len(self._red_agents),
-            blue_agents=len(self._blue_agents),
-        )
+        if self._emit_logs:
+            self._log.info(
+                "simulation_run_started",
+                run_id=self._run.run_id,
+                scenario_id=package.scenario.scenario_id,
+                max_ticks=self._max_ticks,
+                red_agents=len(self._red_agents),
+                blue_agents=len(self._blue_agents),
+            )
         self._record_event(
             SimulationEventType.RUN_STARTED,
             tick=0,
@@ -141,6 +165,7 @@ class SimulationEngine:
     def _initialize_state(self, package: ADSL_ScenarioPackage) -> None:
         self._nodes = deepcopy(package.scenario.nodes)
         self._routes = deepcopy(package.scenario.routes)
+        self._network_index = NetworkIndex(self._nodes, self._routes)
 
     def _initialize_agents(self, package: ADSL_ScenarioPackage) -> None:
         self._red_agents = [
@@ -165,24 +190,57 @@ class SimulationEngine:
     def _execute_tick(self, tick: int) -> None:
         assert self._run is not None
 
-        self._log.info("tick_started", run_id=self._run.run_id, tick=tick)
+        self._tick_targets.clear()
+        if self._emit_logs:
+            self._log.info("tick_started", run_id=self._run.run_id, tick=tick)
         self._record_event(SimulationEventType.TICK_START, tick=tick)
 
+        red_cache: SideObservationCache | None = None
+        red_cache_dirty = True
         for agent, element in self._red_agents:
-            self._execute_agent_turn(agent, element, tick)
+            if red_cache_dirty or red_cache is None:
+                red_cache = build_side_observation_cache(
+                    AgentSide.RED, self._nodes, self._routes
+                )
+                red_cache_dirty = False
+            state_changed = self._execute_agent_turn(
+                agent, element, tick, observation_cache=red_cache
+            )
+            if state_changed:
+                red_cache_dirty = True
 
+        blue_cache: SideObservationCache | None = None
+        blue_cache_dirty = True
         for agent, element in self._blue_agents:
-            self._execute_agent_turn(agent, element, tick)
+            if blue_cache_dirty or blue_cache is None:
+                blue_cache = build_side_observation_cache(
+                    AgentSide.BLUE, self._nodes, self._routes
+                )
+                blue_cache_dirty = False
+            state_changed = self._execute_agent_turn(
+                agent, element, tick, observation_cache=blue_cache
+            )
+            if state_changed:
+                blue_cache_dirty = True
 
-        self._log.info("tick_completed", run_id=self._run.run_id, tick=tick)
+        if self._emit_logs:
+            self._log.info("tick_completed", run_id=self._run.run_id, tick=tick)
         self._record_event(SimulationEventType.TICK_END, tick=tick)
 
     def _execute_agent_turn(
-        self, agent: Agent, element: ADSL_ForceElement, tick: int
-    ) -> None:
+        self,
+        agent: Agent,
+        element: ADSL_ForceElement,
+        tick: int,
+        *,
+        observation_cache: SideObservationCache,
+    ) -> bool:
+        """Execute one agent turn. Returns True when network state may have changed."""
         assert self._run is not None
 
-        observation = self._build_observation(agent, element, tick)
+        observation = self._build_observation(
+            agent, element, tick, observation_cache=observation_cache
+        )
         decision = agent.run_turn(observation)
         action = decision.action
 
@@ -200,21 +258,28 @@ class SimulationEngine:
             },
         )
 
-        self._apply_action(
+        state_changed = self._apply_action(
             action, tick, agent.identity.agent_id, agent_side=agent.identity.side
         )
-        self._log.info(
-            "agent_decision_recorded",
-            run_id=self._run.run_id,
-            tick=tick,
-            agent_id=agent.identity.agent_id,
-            agent_side=agent.identity.side.value,
-            trace_id=decision.audit_trace.trace_id,
-            action_type=action.action_type.value,
-        )
+        if self._emit_logs:
+            self._log.info(
+                "agent_decision_recorded",
+                run_id=self._run.run_id,
+                tick=tick,
+                agent_id=agent.identity.agent_id,
+                agent_side=agent.identity.side.value,
+                trace_id=decision.audit_trace.trace_id,
+                action_type=action.action_type.value,
+            )
+        return state_changed
 
     def _build_observation(
-        self, agent: Agent, element: ADSL_ForceElement, tick: int
+        self,
+        agent: Agent,
+        element: ADSL_ForceElement,
+        tick: int,
+        *,
+        observation_cache: SideObservationCache,
     ) -> Observation:
         assert self._run is not None
 
@@ -223,6 +288,10 @@ class SimulationEngine:
             "seed": self._seed,
             "scenario_id": self._run.scenario_id,
             **build_force_element_context(element),
+            "nodes_by_id": observation_cache.nodes_by_id,
+            "routes_by_id": observation_cache.routes_by_id,
+            "routes_by_source": observation_cache.routes_by_source,
+            "routes_by_target": observation_cache.routes_by_target,
         }
 
         return Observation(
@@ -230,8 +299,8 @@ class SimulationEngine:
             simulation_tick=tick,
             agent_id=agent.identity.agent_id,
             agent_side=side,
-            visible_nodes=visible_nodes_for_side(side, self._nodes),
-            visible_routes=visible_routes_for_side(side, self._routes),
+            visible_nodes=observation_cache.visible_nodes,
+            visible_routes=observation_cache.visible_routes,
             context=context,
         )
 
@@ -242,13 +311,63 @@ class SimulationEngine:
         agent_id: str,
         *,
         agent_side: AgentSide | None = None,
-    ) -> None:
-        """Apply action to simulation state per ADR-004 semantics."""
+    ) -> bool:
+        """Apply action to simulation state per ADR-004/ADR-008 semantics.
+
+        Returns True when live node/route state may have changed (invalidates
+        per-tick observation caches for subsequent agents on the same side).
+        """
         assert self._run is not None
 
+        suppressed, target_key, claimed_by = self._tick_targets.should_suppress(
+            action, agent_id
+        )
+        if suppressed:
+            self._record_event(
+                SimulationEventType.ACTION_SUPPRESSED,
+                tick=tick,
+                agent_id=agent_id,
+                agent_side=agent_side,
+                payload={
+                    "suppressed_agent_id": agent_id,
+                    "action_type": action.action_type.value,
+                    "target_id": action.target_id,
+                    "target_key": target_key,
+                    "claimed_by_agent_id": claimed_by,
+                    "reason": SUPPRESSION_REASON,
+                },
+            )
+            self._record_event(
+                SimulationEventType.ACTION_RECORDED,
+                tick=tick,
+                agent_id=agent_id,
+                agent_side=agent_side,
+                payload={
+                    "action_type": action.action_type.value,
+                    "target_id": action.target_id,
+                    "parameters": action.parameters,
+                    "applied": False,
+                    "suppressed": True,
+                    "target_key": target_key,
+                    "claimed_by_agent_id": claimed_by,
+                },
+            )
+            if self._emit_logs:
+                self._log.info(
+                    "action_suppressed",
+                    run_id=self._run.run_id,
+                    tick=tick,
+                    agent_id=agent_id,
+                    action_type=action.action_type.value,
+                    target_id=action.target_id,
+                    claimed_by_agent_id=claimed_by,
+                )
+            return False
+
         applied = False
+        absorbed = False
         if action.action_type == ActionType.ATTACK_ROUTE and action.target_id:
-            applied = self._apply_attack_route(action.target_id)
+            applied, absorbed = self._apply_attack_route(action.target_id)
         elif action.action_type == ActionType.ATTACK_NODE and action.target_id:
             applied = self._apply_attack_node(action.target_id)
         elif action.action_type == ActionType.HARDEN and action.target_id:
@@ -268,54 +387,46 @@ class SimulationEngine:
                 "target_id": action.target_id,
                 "parameters": action.parameters,
                 "applied": applied,
+                "suppressed": False,
+                "absorbed": absorbed,
             },
         )
-        self._log.info(
-            "action_recorded",
-            run_id=self._run.run_id,
-            tick=tick,
-            agent_id=agent_id,
-            action_type=action.action_type.value,
-            target_id=action.target_id,
-            applied=applied,
-        )
+        if self._emit_logs:
+            self._log.info(
+                "action_recorded",
+                run_id=self._run.run_id,
+                tick=tick,
+                agent_id=agent_id,
+                action_type=action.action_type.value,
+                target_id=action.target_id,
+                applied=applied,
+                absorbed=absorbed,
+            )
+        return applied
 
-    def _apply_attack_route(self, route_id: str) -> bool:
-        for route in self._routes:
-            if route.route_id != route_id:
-                continue
-            if route.status == RouteStatus.OPEN:
-                route.status = RouteStatus.CONTESTED
-                return True
-            if route.status == RouteStatus.CONTESTED:
-                route.status = RouteStatus.CLOSED
-                return True
-            return False
-        return False
+    def _apply_attack_route(self, route_id: str) -> tuple[bool, bool]:
+        route = self._network_index.get_route(route_id)
+        if route is None:
+            return False, False
+        return apply_attack_route(route)
 
     def _apply_attack_node(self, node_id: str) -> bool:
-        for node in self._nodes:
-            if node.node_id != node_id:
-                continue
-            if node.status == NodeStatus.OPERATIONAL:
-                node.status = NodeStatus.DEGRADED
-                return True
-            if node.status == NodeStatus.DEGRADED:
-                node.status = NodeStatus.DESTROYED
-                return True
+        node = self._network_index.get_node(node_id)
+        if node is None:
             return False
+        if node.status == NodeStatus.OPERATIONAL:
+            node.status = NodeStatus.DEGRADED
+            return True
+        if node.status == NodeStatus.DEGRADED:
+            node.status = NodeStatus.DESTROYED
+            return True
         return False
 
     def _apply_harden(self, route_id: str) -> bool:
-        for route in self._routes:
-            if route.route_id != route_id:
-                continue
-            if route.status == RouteStatus.CONTESTED:
-                route.status = RouteStatus.OPEN
-                route.metadata["hardened"] = True
-                return True
+        route = self._network_index.get_route(route_id)
+        if route is None:
             return False
-        return False
+        return apply_harden(route)
 
     def _apply_reroute(self, action: Action) -> bool:
         from_route_id = action.parameters.get("from_route_id")
@@ -323,12 +434,8 @@ class SimulationEngine:
         if not from_route_id or not to_route_id:
             return False
 
-        from_route = next(
-            (route for route in self._routes if route.route_id == from_route_id), None
-        )
-        to_route = next(
-            (route for route in self._routes if route.route_id == to_route_id), None
-        )
+        from_route = self._network_index.get_route(from_route_id)
+        to_route = self._network_index.get_route(to_route_id)
         if from_route is None or to_route is None:
             return False
         if to_route.status != RouteStatus.OPEN:
@@ -346,12 +453,8 @@ class SimulationEngine:
         if not from_node_id or not to_node_id or transfer <= 0:
             return False
 
-        from_node = next(
-            (node for node in self._nodes if node.node_id == from_node_id), None
-        )
-        to_node = next(
-            (node for node in self._nodes if node.node_id == to_node_id), None
-        )
+        from_node = self._network_index.get_node(from_node_id)
+        to_node = self._network_index.get_node(to_node_id)
         if from_node is None or to_node is None:
             return False
 
@@ -378,15 +481,16 @@ class SimulationEngine:
 
         self._audit_traces.append(trace)
         self._run.audit_trace_ids.append(trace.trace_id)
-        self._log.info(
-            "audit_trace_recorded",
-            run_id=self._run.run_id,
-            trace_id=trace.trace_id,
-            agent_id=trace.agent_id,
-            agent_side=trace.agent_side.value,
-            simulation_tick=trace.simulation_tick,
-            decision_category=trace.decision_category.value,
-        )
+        if self._emit_logs:
+            self._log.info(
+                "audit_trace_recorded",
+                run_id=self._run.run_id,
+                trace_id=trace.trace_id,
+                agent_id=trace.agent_id,
+                agent_side=trace.agent_side.value,
+                simulation_tick=trace.simulation_tick,
+                decision_category=trace.decision_category.value,
+            )
 
     def _record_event(
         self,
@@ -422,10 +526,11 @@ class SimulationEngine:
                 "total_audit_traces": len(self._audit_traces),
             },
         )
-        self._log.info(
-            "simulation_run_completed",
-            run_id=self._run.run_id,
-            ticks_executed=self._max_ticks,
-            audit_traces=len(self._audit_traces),
-            events=len(self._events),
-        )
+        if self._emit_logs:
+            self._log.info(
+                "simulation_run_completed",
+                run_id=self._run.run_id,
+                ticks_executed=self._max_ticks,
+                audit_traces=len(self._audit_traces),
+                events=len(self._events),
+            )

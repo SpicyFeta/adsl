@@ -1,3 +1,7 @@
+# Copyright (c) 2026 Apostolos Kalogritsas
+# Licensed under the MIT License.
+# See the LICENSE file in the project root for full license information.
+
 """Canonical Pydantic data models for ADSL Phase 1."""
 
 from __future__ import annotations
@@ -154,6 +158,7 @@ class SimulationEventType(str, Enum):
     TICK_START = "TICK_START"
     AGENT_DECISION = "AGENT_DECISION"
     ACTION_RECORDED = "ACTION_RECORDED"
+    ACTION_SUPPRESSED = "ACTION_SUPPRESSED"
     TICK_END = "TICK_END"
     RUN_STARTED = "RUN_STARTED"
     RUN_COMPLETED = "RUN_COMPLETED"

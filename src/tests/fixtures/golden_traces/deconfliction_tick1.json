@@ -1,0 +1,37 @@
+{
+  "action_suppressed": [
+    {
+      "suppressed_agent_id": "RED-STRIKE-02",
+      "action_type": "ATTACK_ROUTE",
+      "target_id": "R-CONTEST",
+      "target_key": "route:R-CONTEST",
+      "claimed_by_agent_id": "RED-STRIKE-01",
+      "reason": "same_tick_target_conflict"
+    }
+  ],
+  "action_recorded": [
+    {
+      "action_type": "ATTACK_ROUTE",
+      "target_id": "R-CONTEST",
+      "parameters": {
+        "utility_score": 3.6,
+        "modality": "interdiction"
+      },
+      "applied": true,
+      "suppressed": false,
+      "absorbed": false
+    },
+    {
+      "action_type": "ATTACK_ROUTE",
+      "target_id": "R-CONTEST",
+      "parameters": {
+        "utility_score": 2.7,
+        "modality": "interdiction"
+      },
+      "applied": false,
+      "suppressed": true,
+      "target_key": "route:R-CONTEST",
+      "claimed_by_agent_id": "RED-STRIKE-01"
+    }
+  ]
+}

@@ -1,0 +1,593 @@
+{
+  "scenario": {
+    "scenario_id": "alpine-valley-v3",
+    "name": "Meridian Alpine Valley Dual-Corridor",
+    "description": "An inland alpine logistics network where Blue sustains parallel north-ridge and south-ridge supply corridors feeding a central valley depot and twin forward bases. Red interdiction targets mountain passes and ridge supply lines while Blue reroutes through a mid-valley relay when corridors close.",
+    "metadata": {
+      "theater": "Meridian Alpine Exclusion Zone",
+      "duration_days": 18,
+      "contestation_level": "moderate",
+      "primary_objective": "Sustain dual-ridge FOB resupply through contested mountain passes",
+      "topology": "alpine_dual_corridor"
+    },
+    "nodes": [
+      {
+        "node_id": "N-VALLEY-ENTRY",
+        "name": "Valley Entry Terminal",
+        "node_type": "PORT",
+        "latitude": 46.12,
+        "longitude": 7.84,
+        "capacity": 520.0,
+        "current_load": 410.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "critical",
+          "hardening_level": "high",
+          "throughput_tons_per_day": 520
+        }
+      },
+      {
+        "node_id": "N-CENTRAL-DEPOT",
+        "name": "Central Valley Distribution Depot",
+        "node_type": "DEPOT",
+        "latitude": 46.38,
+        "longitude": 8.12,
+        "capacity": 380.0,
+        "current_load": 295.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "critical",
+          "commodity_mix": ["fuel", "ammunition", "rations"],
+          "hardening_level": "medium"
+        }
+      },
+      {
+        "node_id": "N-NORTH-PASS-HUB",
+        "name": "North Ridge Pass Hub",
+        "node_type": "HUB",
+        "latitude": 46.28,
+        "longitude": 8.02,
+        "capacity": 260.0,
+        "current_load": 205.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "routing_priority": 1,
+          "chokepoint": true,
+          "corridor": "north_ridge"
+        }
+      },
+      {
+        "node_id": "N-SOUTH-PASS-HUB",
+        "name": "South Ridge Pass Hub",
+        "node_type": "HUB",
+        "latitude": 46.22,
+        "longitude": 8.18,
+        "capacity": 250.0,
+        "current_load": 198.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "routing_priority": 2,
+          "chokepoint": true,
+          "corridor": "south_ridge"
+        }
+      },
+      {
+        "node_id": "N-EAST-SUBDEPOT",
+        "name": "East Valley Sub-Depot",
+        "node_type": "DEPOT",
+        "latitude": 46.42,
+        "longitude": 8.28,
+        "capacity": 220.0,
+        "current_load": 168.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "commodity_mix": ["ammunition", "spare_parts"],
+          "hardening_level": "medium",
+          "corridor": "north_ridge"
+        }
+      },
+      {
+        "node_id": "N-WEST-SUBDEPOT",
+        "name": "West Valley Sub-Depot",
+        "node_type": "DEPOT",
+        "latitude": 46.35,
+        "longitude": 8.35,
+        "capacity": 210.0,
+        "current_load": 160.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "commodity_mix": ["fuel", "rations"],
+          "hardening_level": "medium",
+          "corridor": "south_ridge"
+        }
+      },
+      {
+        "node_id": "N-FOB-NORTH-RIDGE",
+        "name": "FOB North Ridge Watch",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 46.48,
+        "longitude": 8.22,
+        "capacity": 105.0,
+        "current_load": 78.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "daily_consumption": 13.0,
+          "days_of_supply": 6.0
+        }
+      },
+      {
+        "node_id": "N-FOB-SOUTH-RIDGE",
+        "name": "FOB South Ridge Watch",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 46.30,
+        "longitude": 8.42,
+        "capacity": 98.0,
+        "current_load": 72.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "daily_consumption": 12.0,
+          "days_of_supply": 6.0
+        }
+      },
+      {
+        "node_id": "N-MID-VALLEY-RELAY",
+        "name": "Mid-Valley Relay Station",
+        "node_type": "HUB",
+        "latitude": 46.25,
+        "longitude": 8.10,
+        "capacity": 170.0,
+        "current_load": 125.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "routing_priority": 3,
+          "alternate_hub": true
+        }
+      },
+      {
+        "node_id": "N-MED-STAGING",
+        "name": "Medical Staging Point",
+        "node_type": "DEPOT",
+        "latitude": 46.36,
+        "longitude": 8.20,
+        "capacity": 75.0,
+        "current_load": 48.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "commodity_mix": ["medical", "pharmaceuticals"],
+          "hardening_level": "low"
+        }
+      },
+      {
+        "node_id": "N-FUEL-CACHE",
+        "name": "Alpine Fuel Cache",
+        "node_type": "DEPOT",
+        "latitude": 46.18,
+        "longitude": 8.06,
+        "capacity": 120.0,
+        "current_load": 88.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "commodity_mix": ["fuel"],
+          "hardening_level": "low"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "route_id": "R-NPASS-01",
+        "name": "Valley Entry to North Pass (Primary North Choke)",
+        "source_node_id": "N-VALLEY-ENTRY",
+        "target_node_id": "N-NORTH-PASS-HUB",
+        "capacity": 62.0,
+        "transit_time_hours": 7.0,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "high",
+          "terrain": "mountain_pass",
+          "distance_km": 48,
+          "chokepoint": true,
+          "corridor": "north_ridge",
+          "threat_type": "ridge_interdiction"
+        }
+      },
+      {
+        "route_id": "R-NPASS-02",
+        "name": "North Pass to Central Depot",
+        "source_node_id": "N-NORTH-PASS-HUB",
+        "target_node_id": "N-CENTRAL-DEPOT",
+        "capacity": 52.0,
+        "transit_time_hours": 3.5,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "high",
+          "terrain": "ridge_road",
+          "distance_km": 28,
+          "chokepoint": true,
+          "corridor": "north_ridge",
+          "threat_type": "ambush"
+        }
+      },
+      {
+        "route_id": "R-NPASS-03",
+        "name": "Central Depot to East Sub-Depot",
+        "source_node_id": "N-CENTRAL-DEPOT",
+        "target_node_id": "N-EAST-SUBDEPOT",
+        "capacity": 44.0,
+        "transit_time_hours": 2.5,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "low",
+          "terrain": "valley_road",
+          "distance_km": 18,
+          "corridor": "north_ridge"
+        }
+      },
+      {
+        "route_id": "R-NPASS-04",
+        "name": "East Sub-Depot to FOB North Ridge",
+        "source_node_id": "N-EAST-SUBDEPOT",
+        "target_node_id": "N-FOB-NORTH-RIDGE",
+        "capacity": 30.0,
+        "transit_time_hours": 3.0,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "ridge_track",
+          "distance_km": 22,
+          "corridor": "north_ridge",
+          "threat_type": "raids"
+        }
+      },
+      {
+        "route_id": "R-SPASS-01",
+        "name": "Valley Entry to South Pass (Primary South Choke)",
+        "source_node_id": "N-VALLEY-ENTRY",
+        "target_node_id": "N-SOUTH-PASS-HUB",
+        "capacity": 58.0,
+        "transit_time_hours": 7.5,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "high",
+          "terrain": "mountain_pass",
+          "distance_km": 52,
+          "chokepoint": true,
+          "corridor": "south_ridge",
+          "threat_type": "ridge_interdiction"
+        }
+      },
+      {
+        "route_id": "R-SPASS-02",
+        "name": "South Pass to Central Depot",
+        "source_node_id": "N-SOUTH-PASS-HUB",
+        "target_node_id": "N-CENTRAL-DEPOT",
+        "capacity": 48.0,
+        "transit_time_hours": 3.5,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "high",
+          "terrain": "ridge_road",
+          "distance_km": 26,
+          "chokepoint": true,
+          "corridor": "south_ridge",
+          "threat_type": "ambush"
+        }
+      },
+      {
+        "route_id": "R-SPASS-03",
+        "name": "Central Depot to West Sub-Depot",
+        "source_node_id": "N-CENTRAL-DEPOT",
+        "target_node_id": "N-WEST-SUBDEPOT",
+        "capacity": 42.0,
+        "transit_time_hours": 2.5,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "low",
+          "terrain": "valley_road",
+          "distance_km": 16,
+          "corridor": "south_ridge"
+        }
+      },
+      {
+        "route_id": "R-SPASS-04",
+        "name": "West Sub-Depot to FOB South Ridge",
+        "source_node_id": "N-WEST-SUBDEPOT",
+        "target_node_id": "N-FOB-SOUTH-RIDGE",
+        "capacity": 28.0,
+        "transit_time_hours": 3.5,
+        "status": "CONTESTED",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "ridge_track",
+          "distance_km": 24,
+          "corridor": "south_ridge",
+          "threat_type": "raids"
+        }
+      },
+      {
+        "route_id": "R-LINK-01",
+        "name": "North Pass to Mid-Valley Relay (Alternate)",
+        "source_node_id": "N-NORTH-PASS-HUB",
+        "target_node_id": "N-MID-VALLEY-RELAY",
+        "capacity": 32.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "switchback_road",
+          "distance_km": 20,
+          "alternate_for": "R-NPASS-02"
+        }
+      },
+      {
+        "route_id": "R-LINK-02",
+        "name": "Mid-Valley Relay to South Pass",
+        "source_node_id": "N-MID-VALLEY-RELAY",
+        "target_node_id": "N-SOUTH-PASS-HUB",
+        "capacity": 30.0,
+        "transit_time_hours": 3.5,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "valley_road",
+          "distance_km": 18,
+          "alternate_for": "R-SPASS-02"
+        }
+      },
+      {
+        "route_id": "R-LINK-03",
+        "name": "East to West Sub-Depot Lateral",
+        "source_node_id": "N-EAST-SUBDEPOT",
+        "target_node_id": "N-WEST-SUBDEPOT",
+        "capacity": 36.0,
+        "transit_time_hours": 2.5,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "low",
+          "terrain": "paved_road",
+          "distance_km": 14
+        }
+      },
+      {
+        "route_id": "R-LINK-04",
+        "name": "FOB North to FOB South Interior Link",
+        "source_node_id": "N-FOB-NORTH-RIDGE",
+        "target_node_id": "N-FOB-SOUTH-RIDGE",
+        "capacity": 18.0,
+        "transit_time_hours": 3.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "interior_track",
+          "distance_km": 20
+        }
+      },
+      {
+        "route_id": "R-MED-01",
+        "name": "Medical Staging to East Sub-Depot",
+        "source_node_id": "N-MED-STAGING",
+        "target_node_id": "N-EAST-SUBDEPOT",
+        "capacity": 16.0,
+        "transit_time_hours": 2.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "low",
+          "terrain": "paved_road",
+          "distance_km": 12
+        }
+      },
+      {
+        "route_id": "R-MED-02",
+        "name": "Central Depot to Medical Staging",
+        "source_node_id": "N-CENTRAL-DEPOT",
+        "target_node_id": "N-MED-STAGING",
+        "capacity": 20.0,
+        "transit_time_hours": 2.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "low",
+          "terrain": "paved_road",
+          "distance_km": 10
+        }
+      },
+      {
+        "route_id": "R-FUEL-01",
+        "name": "Fuel Cache to Central Depot",
+        "source_node_id": "N-FUEL-CACHE",
+        "target_node_id": "N-CENTRAL-DEPOT",
+        "capacity": 38.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "valley_road",
+          "distance_km": 24
+        }
+      },
+      {
+        "route_id": "R-ALT-01",
+        "name": "Valley Entry to Mid-Valley Relay Bypass",
+        "source_node_id": "N-VALLEY-ENTRY",
+        "target_node_id": "N-MID-VALLEY-RELAY",
+        "capacity": 28.0,
+        "transit_time_hours": 9.0,
+        "status": "OPEN",
+        "metadata": {
+          "risk_level": "medium",
+          "terrain": "lowland_detour",
+          "distance_km": 58,
+          "alternate_for": "R-NPASS-01"
+        }
+      }
+    ]
+  },
+  "blue_force_elements": [
+    {
+      "element_id": "BLUE-LOG-01",
+      "name": "North Ridge Convoy Alpha",
+      "side": "BLUE",
+      "role": "LOGISTICS_MANAGER",
+      "home_node_id": "N-EAST-SUBDEPOT",
+      "patrol_route_ids": ["R-NPASS-03", "R-NPASS-04", "R-LINK-03"],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "logistics_convoy",
+        "vehicles": 9,
+        "priority_mission": "north_ridge_sustainment"
+      }
+    },
+    {
+      "element_id": "BLUE-LOG-02",
+      "name": "South Ridge Convoy Bravo",
+      "side": "BLUE",
+      "role": "ROUTE_COORDINATOR",
+      "home_node_id": "N-WEST-SUBDEPOT",
+      "patrol_route_ids": ["R-SPASS-03", "R-SPASS-04", "R-LINK-04"],
+      "readiness": 0.88,
+      "metadata": {
+        "unit_type": "logistics_convoy",
+        "vehicles": 8,
+        "priority_mission": "south_ridge_distribution"
+      }
+    },
+    {
+      "element_id": "BLUE-SEC-01",
+      "name": "North Pass Security",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-NORTH-PASS-HUB",
+      "patrol_route_ids": ["R-NPASS-01", "R-NPASS-02"],
+      "readiness": 0.85,
+      "metadata": {
+        "unit_type": "security_element",
+        "personnel": 20,
+        "priority_mission": "north_pass_hardening"
+      }
+    },
+    {
+      "element_id": "BLUE-SEC-02",
+      "name": "South Pass Security",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-SOUTH-PASS-HUB",
+      "patrol_route_ids": ["R-SPASS-01", "R-SPASS-02"],
+      "readiness": 0.84,
+      "metadata": {
+        "unit_type": "security_element",
+        "personnel": 18,
+        "priority_mission": "south_pass_patrol"
+      }
+    },
+    {
+      "element_id": "BLUE-DEP-01",
+      "name": "Central Depot Operations",
+      "side": "BLUE",
+      "role": "DEPOT_OPERATOR",
+      "home_node_id": "N-CENTRAL-DEPOT",
+      "patrol_route_ids": ["R-FUEL-01", "R-MED-02", "R-LINK-01"],
+      "readiness": 0.91,
+      "metadata": {
+        "unit_type": "depot_cell",
+        "personnel": 26,
+        "priority_mission": "central_distribution"
+      }
+    },
+    {
+      "element_id": "BLUE-HUB-01",
+      "name": "Mid-Valley Flow Controller",
+      "side": "BLUE",
+      "role": "DISTRIBUTION_CONTROLLER",
+      "home_node_id": "N-MID-VALLEY-RELAY",
+      "patrol_route_ids": ["R-LINK-01", "R-LINK-02", "R-ALT-01"],
+      "readiness": 0.92,
+      "metadata": {
+        "unit_type": "hub_control",
+        "personnel": 11,
+        "priority_mission": "corridor_failover"
+      }
+    },
+    {
+      "element_id": "BLUE-MED-01",
+      "name": "Medical Logistics Cell",
+      "side": "BLUE",
+      "role": "MEDICAL_LOGISTICS",
+      "home_node_id": "N-MED-STAGING",
+      "patrol_route_ids": ["R-MED-01", "R-MED-02"],
+      "readiness": 0.94,
+      "metadata": {
+        "unit_type": "medical_logistics",
+        "personnel": 7,
+        "priority_mission": "medical_continuity"
+      }
+    }
+  ],
+  "red_force_elements": [
+    {
+      "element_id": "RED-NORTH-01",
+      "name": "North Ridge Interdiction Alpha",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-NPASS-01", "R-NPASS-02", "R-NPASS-04"],
+      "readiness": 0.86,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "capability": "ridge_strike",
+        "priority_target": "north_ridge_corridors",
+        "strike_cooldown_ticks": 3
+      }
+    },
+    {
+      "element_id": "RED-SOUTH-01",
+      "name": "South Ridge Interdiction Bravo",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-SPASS-01", "R-SPASS-02", "R-SPASS-04"],
+      "readiness": 0.84,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "capability": "ridge_strike",
+        "priority_target": "south_ridge_corridors",
+        "strike_cooldown_ticks": 3
+      }
+    },
+    {
+      "element_id": "RED-BYPASS-01",
+      "name": "Valley Bypass Hunter Charlie",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-ALT-01", "R-LINK-01", "R-LINK-02"],
+      "readiness": 0.81,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "capability": "ambush",
+        "priority_target": "alternate_corridors",
+        "strike_cooldown_ticks": 4
+      }
+    },
+    {
+      "element_id": "RED-SIGINT-01",
+      "name": "Alpine SIGINT Detachment",
+      "side": "RED",
+      "role": "RECONNAISSANCE",
+      "home_node_id": null,
+      "patrol_route_ids": ["R-NPASS-01", "R-SPASS-01", "R-LINK-03"],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "sigint",
+        "capability": "movement_detection",
+        "priority_target": "convoy_timing"
+      }
+    }
+  ]
+}

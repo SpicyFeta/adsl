@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADSL Simulation Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <div class="brand">
+      <h1>ADSL Simulation Dashboard</h1>
+      <p class="subtitle">Visual exploration of ADR-009 export bundles with analytics overlay</p>
+    </div>
+    <div class="run-controls">
+      <label for="run-select">Run</label>
+      <select id="run-select"></select>
+      <button id="reload-btn" type="button">Reload</button>
+      <button id="presentation-btn" type="button" class="secondary-btn" title="Presentation mode">Present</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Map Filters</h2>
+        <label class="checkbox">
+          <input type="checkbox" id="filter-contested" />
+          Contested routes only
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="filter-hide-open" />
+          Hide OPEN routes
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="filter-high-risk" />
+          High-risk entities only (≥45)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="filter-focus-areas" />
+          Highlight focus areas
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="filter-bottlenecks" checked />
+          Show bottlenecks
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="filter-red-activity" />
+          Emphasize Red activity
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="filter-show-risk-scores" checked />
+          Show risk score badges
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Compare Runs</h2>
+        <label class="checkbox">
+          <input type="checkbox" id="compare-enabled" />
+          Enable comparison overlay
+        </label>
+        <label class="field-label" for="compare-select">Baseline run</label>
+        <select id="compare-select" disabled></select>
+        <p class="hint">Highlights entities that worsened vs baseline (status or risk).</p>
+        <div id="comparison-summary" class="comparison-summary hidden"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Legend</h2>
+        <div class="legend">
+          <div><span class="swatch open"></span> Open / Operational</div>
+          <div><span class="swatch contested"></span> Contested / Degraded</div>
+          <div><span class="swatch closed"></span> Closed / Destroyed</div>
+          <div><span class="swatch bottleneck"></span> Bottleneck ring</div>
+          <div><span class="swatch risk-high"></span> High risk (≥45)</div>
+          <div><span class="swatch risk-critical"></span> Critical risk (≥70)</div>
+          <div><span class="swatch focus-area"></span> Recommended focus area</div>
+          <div><span class="swatch compare-worse"></span> Worsened vs baseline</div>
+        </div>
+      </section>
+
+      <section class="panel" id="run-meta">
+        <h2>Run Details</h2>
+        <dl id="run-details"></dl>
+      </section>
+    </aside>
+
+    <section class="map-panel">
+      <div class="map-toolbar">
+        <span id="scenario-title">Loading…</span>
+        <span id="map-hint">Scroll to zoom · Drag to pan · Click entity for details</span>
+      </div>
+      <div id="map-container">
+        <svg id="network-map" aria-label="Simulation network map"></svg>
+      </div>
+      <div id="selection-detail" class="selection-detail hidden"></div>
+    </section>
+
+    <aside class="metrics-panel">
+      <section class="panel">
+        <h2>Network Metrics</h2>
+        <div id="metric-cards" class="metric-cards"></div>
+      </section>
+      <section class="panel">
+        <h2>Top Risks</h2>
+        <div id="top-risks" class="risk-list"></div>
+      </section>
+      <section class="panel">
+        <h2>Route Status</h2>
+        <div id="route-chart" class="bar-chart"></div>
+      </section>
+      <section class="panel">
+        <h2>Node Status</h2>
+        <div id="node-chart" class="bar-chart"></div>
+      </section>
+      <section class="panel">
+        <h2>Red Activity</h2>
+        <div id="red-activity" class="red-activity"></div>
+      </section>
+      <section class="panel insights-panel">
+        <h2>Automated Insights</h2>
+        <div id="key-insights" class="insight-list"></div>
+        <h3 class="subheading">Critical Highlights</h3>
+        <div id="critical-highlights" class="insight-list"></div>
+        <h3 class="subheading">Corridor Risk</h3>
+        <div id="corridor-risks" class="insight-list"></div>
+        <h3 class="subheading">Focus Areas</h3>
+        <div id="focus-areas" class="insight-list focus-clickable"></div>
+        <h3 class="subheading">Node Risk</h3>
+        <div id="node-risks" class="insight-list"></div>
+      </section>
+      <section class="panel annotations-panel">
+        <h2>Team Annotations</h2>
+        <div id="annotations-list" class="annotation-list"></div>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    Data source: ADR-009 run_bundle.json + analytics insights ·
+    <span id="data-provenance"></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

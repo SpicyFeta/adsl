@@ -1,0 +1,38 @@
+flowchart TB
+    subgraph Data["Data Layer"]
+        V1[kessari-strait-v1]
+        V2[island-chokepoint-v2]
+        V3[alpine-valley-v3]
+        REG[scenario_registry.json]
+    end
+
+    subgraph Core["Simulation Core"]
+        LOAD[Scenario Loader]
+        ENG[Simulation Engine]
+        ORCH[Orchestration]
+        HARD[Hardening v2]
+        DEC[Deconfliction]
+        PACE[Red Pacing ADR-010]
+    end
+
+    subgraph Agents["Agent Layer"]
+        RED[Red Interdiction]
+        BLUE[Blue Logistics]
+        TRACE[AuditTrace ADR-003]
+    end
+
+    subgraph Output["Output Layer"]
+        EXP[Export ADR-009]
+        CMP[Compare / Batch]
+        VIZ[Dashboard optional]
+        ONT[Ontology ADR-006]
+    end
+
+    REG --> V1 & V2 & V3
+    V1 & V2 & V3 --> LOAD --> ENG
+    ENG --> ORCH --> RED & BLUE
+    RED --> PACE
+    RED & BLUE --> TRACE
+    ENG --> HARD & DEC
+    TRACE --> EXP
+    EXP --> CMP & VIZ & ONT

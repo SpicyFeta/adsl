@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "description": "ADSL performance comparison — Inc 10 initial vs Inc 10 optimized vs Inc 16 (per-tick observation cache with dirty invalidation)",
+  "measurement_notes": [
+    "Seed 42, quiet_logs=true, Windows Python 3.14 reference host",
+    "Engine-only timings exclude export bundle and analytics generation",
+    "Full-run timings include ADR-009 bundle build with insights",
+    "Inc 16: SideObservationCache reused across agents until a state-mutating action applies"
+  ],
+  "comparisons": [
+    {
+      "scenario_id": "island-chokepoint-v2",
+      "ticks": 100,
+      "seed": 42,
+      "nodes": 12,
+      "agents_per_tick": 11,
+      "before": {"elapsed_seconds": 0.1627, "ticks_per_second": 614.7},
+      "after_inc10": {"elapsed_seconds": 0.177, "ticks_per_second": 563.2},
+      "after_inc16_engine": {"elapsed_seconds": 0.104, "ticks_per_second": 964.8},
+      "after_inc16_full": {"elapsed_seconds": 0.146, "ticks_per_second": 685.5},
+      "delta_percent_vs_inc10_engine": 41.2,
+      "interpretation": "Workshop scenario faster; cache reuse helps when agents hold fire"
+    },
+    {
+      "scenario_id": "alpine-valley-v3",
+      "ticks": 100,
+      "seed": 42,
+      "nodes": 11,
+      "agents_per_tick": 11,
+      "before": {"elapsed_seconds": 0.1596, "ticks_per_second": 626.7},
+      "after_inc10": {"elapsed_seconds": 0.173, "ticks_per_second": 579.4},
+      "after_inc16_engine": {"elapsed_seconds": 0.103, "ticks_per_second": 973.6},
+      "after_inc16_full": {"elapsed_seconds": 0.148, "ticks_per_second": 673.4},
+      "delta_percent_vs_inc10_engine": 40.5,
+      "interpretation": "Stable for standard workshop workloads"
+    },
+    {
+      "scenario_id": "continental-grid-scale-v4",
+      "ticks": 150,
+      "seed": 42,
+      "nodes": 17,
+      "agents_per_tick": 20,
+      "before": {"elapsed_seconds": 0.3787, "ticks_per_second": 396.1},
+      "after_inc10": {"elapsed_seconds": 0.476, "ticks_per_second": 315.3},
+      "after_inc16_engine": {"elapsed_seconds": 0.204, "ticks_per_second": 734.3},
+      "after_inc16_full": {"elapsed_seconds": 0.329, "ticks_per_second": 455.6},
+      "delta_percent_vs_inc10_engine": 57.1,
+      "interpretation": "Scale scenario ~2.3× faster engine-only vs Inc 10"
+    },
+    {
+      "scenario_id": "continental-mega-scale-v5",
+      "ticks": 200,
+      "seed": 42,
+      "nodes": 37,
+      "agents_per_tick": 36,
+      "before": null,
+      "after_inc10": {"elapsed_seconds": 1.576, "ticks_per_second": 126.9, "audit_traces": 7200},
+      "after_inc16_engine": {"elapsed_seconds": 0.558, "ticks_per_second": 358.2, "audit_traces": 7200},
+      "after_inc16_full": {"elapsed_seconds": 0.864, "ticks_per_second": 231.6, "audit_traces": 7200},
+      "delta_percent_vs_inc10_engine": 64.6,
+      "interpretation": "Mega scenario ~2.8× faster engine-only; memory ~44 MB peak (engine-only)"
+    }
+  ],
+  "profiling_summary": {
+    "primary_bottleneck_inc10": "Per-agent observation model_copy on every turn (~50% CPU on mega-scale)",
+    "primary_bottleneck_inc16": "Agent decision logic and audit trace construction (~35% CPU after cache)",
+    "inc16_optimizations": [
+      "SideObservationCache with dirty invalidation on applied actions",
+      "Pre-built nodes_by_id / routes_by_id / endpoint indexes in observation context",
+      "NetworkIndex route endpoint indexes for engine mutations",
+      "Indexed alternate-route lookup in BlueLogisticsAgent"
+    ],
+    "hotspot_functions_after_inc16": [
+      "BlueLogisticsAgent.decide",
+      "AuditTraceBuilder.build",
+      "_record_event",
+      "build_side_observation_cache (only on cache miss)"
+    ]
+  }
+}

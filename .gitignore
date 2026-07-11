@@ -80,6 +80,7 @@ docker-compose.override.yml
 # Logs and local data artifacts
 *.log
 logs/
+exports/
 data/synthetic/*
 !data/synthetic/.gitkeep
 !data/synthetic/*.json

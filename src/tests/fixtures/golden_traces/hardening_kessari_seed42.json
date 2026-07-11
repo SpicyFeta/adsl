@@ -1,0 +1,22 @@
+{
+  "first_harden": {
+    "target_id": "R-003",
+    "tick": 0
+  },
+  "first_absorbed_attack": {
+    "action_type": "ATTACK_ROUTE",
+    "target_id": "R-003",
+    "parameters": {
+      "utility_score": 2.46,
+      "modality": "raids"
+    },
+    "applied": true,
+    "suppressed": false,
+    "absorbed": true
+  },
+  "route_snapshot": {
+    "route_id": "R-003",
+    "status": "OPEN",
+    "harden_absorbed_min": 1
+  }
+}

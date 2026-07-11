@@ -1,3 +1,7 @@
+# Copyright (c) 2026 Apostolos Kalogritsas
+# Licensed under the MIT License.
+# See the LICENSE file in the project root for full license information.
+
 """Scenario dataset loading utilities."""
 
 from __future__ import annotations

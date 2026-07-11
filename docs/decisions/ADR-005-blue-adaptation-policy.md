@@ -1,6 +1,6 @@
 # ADR-005: Blue Adaptation Policy (REROUTE, REALLOCATE, HARDEN)
 
-**Status:** Proposed  
+**Status:** Accepted
 **Date:** 2026-07-08  
 **Deciders:** ADSL Engineering Team, Project Management  
 **Phase:** Phase 1 — Contested Logistics Stress Test MVP

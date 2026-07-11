@@ -1,0 +1,20 @@
+{
+  "ticks": 50,
+  "runs": [
+    {
+      "scenario": "alpine-valley-v3",
+      "seed": 42,
+      "label": "alpine-baseline"
+    },
+    {
+      "scenario": "alpine-valley-v3",
+      "seed": 99,
+      "label": "alpine-alt-seed"
+    },
+    {
+      "scenario": "island-chokepoint-v2",
+      "seed": 42,
+      "label": "island-reference"
+    }
+  ]
+}

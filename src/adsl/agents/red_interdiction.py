@@ -1,8 +1,13 @@
-"""Red interdiction agent — rule-based target selection for Phase 1."""
+# Copyright (c) 2026 Apostolos Kalogritsas
+# Licensed under the MIT License.
+# See the LICENSE file in the project root for full license information.
+
+"""Red interdiction agent — rule-based target selection with ADR-010 pacing."""
 
 from __future__ import annotations
 
 from adsl.agents.base import Agent
+from adsl.agents.red_pacing import RedPacingState
 from adsl.explainability.trace import AuditTraceBuilder
 from adsl.models import (
     Action,
@@ -48,7 +53,7 @@ ROLE_RECONNAISSANCE = "RECONNAISSANCE"
 
 class RedInterdictionAgent(Agent):
     """
-    Phase 1 Red agent using deterministic utility scoring.
+    Red agent using deterministic utility scoring with ADR-010 strike pacing.
 
     - STRIKE: attack highest-value route on patrol list
     - FIRE_SUPPORT: attack highest-value node (hubs/depots/ports)
@@ -68,12 +73,14 @@ class RedInterdictionAgent(Agent):
         self._priority_target: str | None = None
         self._capability: str | None = None
         self._engaged_targets: set[str] = set()
+        self._pacing = RedPacingState()
 
         if force_element is not None:
             self._patrol_route_ids = set(force_element.patrol_route_ids)
             self._readiness = force_element.readiness
             self._priority_target = force_element.metadata.get("priority_target")
             self._capability = force_element.metadata.get("capability")
+            self._pacing = RedPacingState.from_metadata(force_element.metadata)
 
     def perceive(self, observation: Observation) -> None:
         context = observation.context
@@ -85,10 +92,15 @@ class RedInterdictionAgent(Agent):
             self._readiness = float(readiness)
         self._priority_target = context.get("priority_target", self._priority_target)
         self._capability = context.get("capability", self._capability)
+        cooldown = context.get("strike_cooldown_ticks")
+        if cooldown is not None:
+            self._pacing.strike_cooldown_ticks = int(cooldown)
 
     def decide(self, observation: Observation) -> DecisionResult:
         role = self.identity.role
-        node_index = {node.node_id: node for node in observation.visible_nodes}
+        node_index = observation.context.get("nodes_by_id") or {
+            node.node_id: node for node in observation.visible_nodes
+        }
 
         if role == ROLE_RECONNAISSANCE:
             return self._decide_reconnaissance(observation)
@@ -101,6 +113,7 @@ class RedInterdictionAgent(Agent):
     def reset(self) -> None:
         super().reset()
         self._engaged_targets.clear()
+        self._pacing.reset()
 
     def _decide_reconnaissance(self, observation: Observation) -> DecisionResult:
         monitored = self._top_routes_for_surveillance(observation.visible_routes, limit=3)
@@ -146,7 +159,27 @@ class RedInterdictionAgent(Agent):
         observation: Observation,
         node_index: dict[str, ADSL_LogisticsNode],
     ) -> DecisionResult:
-        candidates = self._score_routes(observation.visible_routes, node_index)
+        tick = observation.simulation_tick
+
+        if not self._pacing.has_strike_budget():
+            return self._pacing_hold_result(
+                observation,
+                pacing_hold_reason="strike_budget_exhausted",
+                strike_budget_remaining=0,
+                summary="Hold — strike budget exhausted",
+            )
+
+        if self._pacing.is_route_cooldown_active(tick):
+            return self._pacing_hold_result(
+                observation,
+                pacing_hold_reason="route_cooldown_active",
+                cooldown_remaining=self._pacing.route_cooldown_remaining(tick),
+                summary="Hold — strike cooldown active",
+            )
+
+        candidates = self._score_routes(
+            observation.visible_routes, node_index, tick=tick
+        )
         selected = self._select_best(candidates)
 
         if selected is None:
@@ -168,7 +201,9 @@ class RedInterdictionAgent(Agent):
         route = selected["route"]
         utility = selected["utility"]
         self._engaged_targets.add(route.route_id)
+        self._pacing.record_route_attack(tick, route.route_id)
 
+        budget_remaining = self._pacing.strike_budget_remaining
         trace = (
             AuditTraceBuilder(
                 run_id=observation.run_id,
@@ -184,6 +219,7 @@ class RedInterdictionAgent(Agent):
                     "priority_target": self._priority_target,
                     "readiness": self._readiness,
                     "candidate_count": len(candidates),
+                    "strike_budget_remaining": budget_remaining,
                     "top_candidates": [
                         {
                             "route_id": entry["route"].route_id,
@@ -192,6 +228,13 @@ class RedInterdictionAgent(Agent):
                         for entry in candidates[:3]
                     ],
                 }
+            )
+            .add_reasoning_step(
+                "ADR-010: route strike pacing clear; cooldown and budget gates passed.",
+                evidence={
+                    "cooldown_remaining": 0,
+                    "strike_budget_remaining": budget_remaining,
+                },
             )
             .add_reasoning_step(
                 "Screened patrol routes for interdiction value using risk, status, and FOB connectivity.",
@@ -204,7 +247,16 @@ class RedInterdictionAgent(Agent):
                     "utility": utility,
                     "risk_level": route.metadata.get("risk_level"),
                     "status": route.status.value,
+                    "harden_level": route.metadata.get("harden_level", 0),
                 },
+            )
+            .add_reasoning_step(
+                (
+                    "ADR-008: target route has active hardening; attack may be absorbed."
+                    if int(route.metadata.get("harden_level", 0)) > 0
+                    else "ADR-008: no active hardening on target route."
+                ),
+                evidence={"harden_level": route.metadata.get("harden_level", 0)},
             )
             .with_action(
                 ActionType.ATTACK_ROUTE,
@@ -230,9 +282,29 @@ class RedInterdictionAgent(Agent):
         observation: Observation,
         node_index: dict[str, ADSL_LogisticsNode],
     ) -> DecisionResult:
+        tick = observation.simulation_tick
+
+        if not self._pacing.has_strike_budget():
+            return self._pacing_hold_result(
+                observation,
+                pacing_hold_reason="strike_budget_exhausted",
+                strike_budget_remaining=0,
+                summary="Hold — strike budget exhausted",
+            )
+
+        if self._pacing.is_node_cooldown_active(tick):
+            return self._pacing_hold_result(
+                observation,
+                pacing_hold_reason="node_cooldown_active",
+                cooldown_remaining=self._pacing.node_cooldown_remaining(tick),
+                summary="Hold — strike cooldown active",
+            )
+
         patrol_node_ids = self._patrol_endpoint_nodes(observation.visible_routes)
         candidates = self._score_nodes(
-            observation.visible_nodes, patrol_node_ids=patrol_node_ids
+            observation.visible_nodes,
+            patrol_node_ids=patrol_node_ids,
+            tick=tick,
         )
         selected = self._select_best(candidates)
 
@@ -255,7 +327,9 @@ class RedInterdictionAgent(Agent):
         node = selected["node"]
         utility = selected["utility"]
         self._engaged_targets.add(node.node_id)
+        self._pacing.record_node_attack(tick, node.node_id)
 
+        budget_remaining = self._pacing.strike_budget_remaining
         trace = (
             AuditTraceBuilder(
                 run_id=observation.run_id,
@@ -271,6 +345,7 @@ class RedInterdictionAgent(Agent):
                     "readiness": self._readiness,
                     "patrol_route_ids": sorted(self._patrol_route_ids),
                     "candidate_count": len(candidates),
+                    "strike_budget_remaining": budget_remaining,
                     "top_candidates": [
                         {
                             "node_id": entry["node"].node_id,
@@ -279,6 +354,13 @@ class RedInterdictionAgent(Agent):
                         for entry in candidates[:3]
                     ],
                 }
+            )
+            .add_reasoning_step(
+                "ADR-010: node strike pacing clear; cooldown and budget gates passed.",
+                evidence={
+                    "cooldown_remaining": 0,
+                    "strike_budget_remaining": budget_remaining,
+                },
             )
             .add_reasoning_step(
                 "Screened nodes by strategic value, type, load, and patrol route affiliation.",
@@ -316,12 +398,16 @@ class RedInterdictionAgent(Agent):
         self,
         routes: list[ADSL_LogisticsRoute],
         node_index: dict[str, ADSL_LogisticsNode],
+        *,
+        tick: int,
     ) -> list[dict]:
         scored: list[dict] = []
         for route in routes:
             if route.status == RouteStatus.CLOSED:
                 continue
             if self._patrol_route_ids and route.route_id not in self._patrol_route_ids:
+                continue
+            if self._pacing.is_target_in_rotation_window(route.route_id, tick):
                 continue
 
             risk = route.metadata.get("risk_level", "medium")
@@ -352,6 +438,7 @@ class RedInterdictionAgent(Agent):
         nodes: list[ADSL_LogisticsNode],
         *,
         patrol_node_ids: set[str],
+        tick: int,
     ) -> list[dict]:
         scored: list[dict] = []
 
@@ -363,6 +450,8 @@ class RedInterdictionAgent(Agent):
                 NodeType.DEPOT,
                 NodeType.PORT,
             }:
+                continue
+            if self._pacing.is_target_in_rotation_window(node.node_id, tick):
                 continue
 
             strategic = node.metadata.get("strategic_value", "medium")
@@ -422,6 +511,49 @@ class RedInterdictionAgent(Agent):
         if best_utility <= 0:
             return None
         return candidates[0]
+
+    def _pacing_hold_result(
+        self,
+        observation: Observation,
+        *,
+        pacing_hold_reason: str,
+        summary: str,
+        cooldown_remaining: int | None = None,
+        strike_budget_remaining: int | None = None,
+    ) -> DecisionResult:
+        evidence: dict = {"pacing_hold_reason": pacing_hold_reason}
+        if cooldown_remaining is not None:
+            evidence["cooldown_remaining"] = cooldown_remaining
+        if strike_budget_remaining is not None:
+            evidence["strike_budget_remaining"] = strike_budget_remaining
+
+        trace = (
+            AuditTraceBuilder(
+                run_id=observation.run_id,
+                agent_id=self.identity.agent_id,
+                agent_side=AgentSide.RED,
+                simulation_tick=observation.simulation_tick,
+                decision_category=DecisionCategory.NO_ACTION,
+            )
+            .with_inputs(
+                {
+                    "role": self.identity.role,
+                    "patrol_route_ids": sorted(self._patrol_route_ids),
+                    "strike_cooldown_ticks": self._pacing.strike_cooldown_ticks,
+                    **evidence,
+                }
+            )
+            .add_reasoning_step(
+                "ADR-010: strike pacing gate active; holding fire per Red variety policy.",
+                evidence=evidence,
+            )
+            .with_action(ActionType.NO_ACTION, action_summary=summary)
+            .build()
+        )
+        return DecisionResult(
+            action=Action(action_type=ActionType.NO_ACTION),
+            audit_trace=trace,
+        )
 
     def _no_action_result(
         self,

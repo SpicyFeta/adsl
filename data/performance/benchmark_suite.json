@@ -1,0 +1,9 @@
+{
+  "ticks": 100,
+  "runs": [
+    {"scenario": "island-chokepoint-v2", "seed": 42, "label": "workshop-baseline"},
+    {"scenario": "alpine-valley-v3", "seed": 42, "label": "alpine-baseline"},
+    {"scenario": "continental-grid-scale-v4", "seed": 42, "ticks": 150, "label": "scale-stress"},
+    {"scenario": "continental-mega-scale-v5", "seed": 42, "ticks": 200, "label": "mega-stress"}
+  ]
+}

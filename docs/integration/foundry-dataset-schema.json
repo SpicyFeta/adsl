@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "description": "Recommended Foundry dataset record shapes for ADSL import/export (ADR-011).",
+  "record_types": {
+    "adsl_scenario_package": {
+      "direction": "import",
+      "required_fields": ["dataset_schema_version", "record_type", "scenario_id", "lineage", "payload"],
+      "payload": "ADSL_ScenarioPackage JSON object"
+    },
+    "adsl_simulation_run": {
+      "direction": "export",
+      "required_fields": ["dataset_schema_version", "record_type", "run_id", "lineage", "payload"],
+      "payload": {
+        "run": "ADSL_SimulationRun",
+        "execution": "ticks, seed, dataset_path",
+        "summary_statistics": "aggregated metrics"
+      }
+    },
+    "adsl_network_snapshot": {
+      "direction": "export",
+      "payload": "network_state nodes and routes"
+    },
+    "adsl_audit_trace": {
+      "direction": "export",
+      "append_only": true,
+      "payload": "immutable ADSL_AuditTrace"
+    },
+    "adsl_annotations": {
+      "direction": "export",
+      "optional": true,
+      "payload": "collaboration annotations.json document"
+    },
+    "adsl_insights": {
+      "direction": "export",
+      "optional": true,
+      "payload": "analytics insights.json report"
+    },
+    "adsl_lineage": {
+      "direction": "both",
+      "payload": "provenance summary with lineage_id and parent references"
+    }
+  },
+  "lineage_block": {
+    "required_fields": [
+      "lineage_schema_version",
+      "lineage_id",
+      "source_system",
+      "operation",
+      "recorded_at"
+    ],
+    "optional_fields": ["parent_dataset_rid", "parent_run_id", "scenario_id"]
+  }
+}

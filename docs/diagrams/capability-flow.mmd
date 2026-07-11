@@ -1,0 +1,31 @@
+flowchart TB
+    subgraph Input
+        SC[Scenario JSON]
+        REG[Scenario Registry]
+    end
+
+    subgraph Engine
+        ENG[Simulation Engine]
+        RED[Red Agents]
+        BLUE[Blue Agents]
+        HARD[Hardening]
+        DEC[Deconfliction]
+    end
+
+    subgraph Output
+        TRACE[Audit Traces]
+        EVT[Events]
+        CLI[CLI Summary]
+        BUNDLE[ADR-009 Export]
+        VIZ[Dashboard]
+        ONT[Ontology Payload]
+    end
+
+    REG --> SC --> ENG
+    ENG --> RED --> HARD --> DEC
+    ENG --> BLUE --> HARD --> DEC
+    DEC --> TRACE --> BUNDLE
+    DEC --> EVT --> BUNDLE
+    ENG --> CLI
+    BUNDLE --> VIZ
+    BUNDLE --> ONT

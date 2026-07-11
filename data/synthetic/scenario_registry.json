@@ -1,0 +1,7 @@
+{
+  "kessari-strait-v1": "logistics_scenario_v1.json",
+  "island-chokepoint-v2": "logistics_scenario_v2.json",
+  "alpine-valley-v3": "logistics_scenario_v3.json",
+  "continental-grid-scale-v4": "logistics_scenario_scale.json",
+  "continental-mega-scale-v5": "logistics_scenario_mega.json"
+}

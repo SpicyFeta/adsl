@@ -1,0 +1,10 @@
+{
+  "attack": {
+    "target_id": "R-OPEN"
+  },
+  "hold": {
+    "action_summary": "Hold — strike cooldown active",
+    "cooldown_remaining": 2,
+    "pacing_hold_reason": "route_cooldown_active"
+  }
+}

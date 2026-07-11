@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant E as Engine
+    participant R as Red Agents
+    participant D as Deconfliction
+    participant H as Hardening
+    participant B as Blue Agents
+    participant T as AuditTrace
+
+    E->>E: TICK_START
+    loop Each Red agent
+        E->>R: perceive + decide + act
+        R->>D: register target
+        R->>H: attack / absorb
+        R->>T: record trace
+    end
+    loop Each Blue agent
+        E->>B: perceive + decide + act
+        B->>D: register target
+        B->>H: harden
+        B->>T: record trace
+    end
+    E->>E: TICK_COMPLETE

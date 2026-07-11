@@ -1,0 +1,29 @@
+{
+  "ticks": 50,
+  "runs": [
+    {
+      "scenario": "alpine-valley-v3",
+      "seed": 42,
+      "label": "cooldown-default",
+      "red_pacing": {}
+    },
+    {
+      "scenario": "alpine-valley-v3",
+      "seed": 42,
+      "label": "cooldown-fast",
+      "red_pacing": {
+        "RED-NORTH-01": { "strike_cooldown_ticks": 1 },
+        "RED-SOUTH-01": { "strike_cooldown_ticks": 1 }
+      }
+    },
+    {
+      "scenario": "alpine-valley-v3",
+      "seed": 42,
+      "label": "cooldown-slow",
+      "red_pacing": {
+        "RED-NORTH-01": { "strike_cooldown_ticks": 8 },
+        "RED-SOUTH-01": { "strike_cooldown_ticks": 8 }
+      }
+    }
+  ]
+}

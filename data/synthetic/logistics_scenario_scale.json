@@ -1,0 +1,870 @@
+{
+  "scenario": {
+    "scenario_id": "continental-grid-scale-v4",
+    "name": "Continental Grid Scale Stress Network",
+    "description": "An 18-node, quad-corridor grid designed for performance and scale testing. Four parallel supply corridors with chokepoint hubs stress multi-agent orchestration and batch analyst workflows at higher tick counts.",
+    "metadata": {
+      "theater": "Continental Scale Exercise Zone",
+      "duration_days": 30,
+      "contestation_level": "moderate",
+      "primary_objective": "Sustain tri-corridor grid resupply under parallel interdiction",
+      "topology": "continental_grid_scale",
+      "scale_test": true
+    },
+    "nodes": [
+      {
+        "node_id": "N-MAIN-PORT",
+        "name": "Continental Main Port",
+        "node_type": "PORT",
+        "latitude": 40.0,
+        "longitude": -75.0,
+        "capacity": 800.0,
+        "current_load": 620.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "critical",
+          "hardening_level": "high",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-ALPHA-1",
+        "name": "Alpha Sector Node 1",
+        "node_type": "DEPOT",
+        "latitude": 40.5,
+        "longitude": -74.5,
+        "capacity": 300.0,
+        "current_load": 220.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "alpha",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-ALPHA-2",
+        "name": "Alpha Sector Node 2",
+        "node_type": "HUB",
+        "latitude": 40.5,
+        "longitude": -74.15,
+        "capacity": 260.0,
+        "current_load": 190.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "alpha",
+          "chokepoint": true,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-ALPHA-3",
+        "name": "Alpha Sector Node 3",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 40.5,
+        "longitude": -73.8,
+        "capacity": 220.0,
+        "current_load": 160.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "alpha",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-ALPHA-4",
+        "name": "Alpha Sector Node 4",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 40.5,
+        "longitude": -73.45,
+        "capacity": 180.0,
+        "current_load": 130.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "alpha",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-BRAVO-1",
+        "name": "Bravo Sector Node 1",
+        "node_type": "DEPOT",
+        "latitude": 40.85,
+        "longitude": -74.5,
+        "capacity": 300.0,
+        "current_load": 220.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "bravo",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-BRAVO-2",
+        "name": "Bravo Sector Node 2",
+        "node_type": "HUB",
+        "latitude": 40.85,
+        "longitude": -74.15,
+        "capacity": 260.0,
+        "current_load": 190.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "bravo",
+          "chokepoint": true,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-BRAVO-3",
+        "name": "Bravo Sector Node 3",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 40.85,
+        "longitude": -73.8,
+        "capacity": 220.0,
+        "current_load": 160.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "bravo",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-BRAVO-4",
+        "name": "Bravo Sector Node 4",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 40.85,
+        "longitude": -73.45,
+        "capacity": 180.0,
+        "current_load": 130.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "bravo",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-CHARLIE-1",
+        "name": "Charlie Sector Node 1",
+        "node_type": "DEPOT",
+        "latitude": 41.2,
+        "longitude": -74.5,
+        "capacity": 300.0,
+        "current_load": 220.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "charlie",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-CHARLIE-2",
+        "name": "Charlie Sector Node 2",
+        "node_type": "HUB",
+        "latitude": 41.2,
+        "longitude": -74.15,
+        "capacity": 260.0,
+        "current_load": 190.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "charlie",
+          "chokepoint": true,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-CHARLIE-3",
+        "name": "Charlie Sector Node 3",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 41.2,
+        "longitude": -73.8,
+        "capacity": 220.0,
+        "current_load": 160.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "charlie",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-CHARLIE-4",
+        "name": "Charlie Sector Node 4",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 41.2,
+        "longitude": -73.45,
+        "capacity": 180.0,
+        "current_load": 130.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "charlie",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-DELTA-1",
+        "name": "Delta Sector Node 1",
+        "node_type": "DEPOT",
+        "latitude": 41.55,
+        "longitude": -74.5,
+        "capacity": 300.0,
+        "current_load": 220.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "delta",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-DELTA-2",
+        "name": "Delta Sector Node 2",
+        "node_type": "HUB",
+        "latitude": 41.55,
+        "longitude": -74.15,
+        "capacity": 260.0,
+        "current_load": 190.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "high",
+          "corridor": "delta",
+          "chokepoint": true,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-DELTA-3",
+        "name": "Delta Sector Node 3",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 41.55,
+        "longitude": -73.8,
+        "capacity": 220.0,
+        "current_load": 160.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "delta",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "node_id": "N-DELTA-4",
+        "name": "Delta Sector Node 4",
+        "node_type": "FORWARD_OPERATING_BASE",
+        "latitude": 41.55,
+        "longitude": -73.45,
+        "capacity": 180.0,
+        "current_load": 130.0,
+        "status": "OPERATIONAL",
+        "metadata": {
+          "strategic_value": "medium",
+          "corridor": "delta",
+          "chokepoint": false,
+          "topology": "scale_grid"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "route_id": "R-PORT-ALPHA-1",
+        "name": "Port to Alpha Entry",
+        "source_node_id": "N-MAIN-PORT",
+        "target_node_id": "N-ALPHA-1",
+        "capacity": 90.0,
+        "transit_time_hours": 6.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "alpha",
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-ALPHA-1-ALPHA-2",
+        "name": "Alpha leg 1->2",
+        "source_node_id": "N-ALPHA-1",
+        "target_node_id": "N-ALPHA-2",
+        "capacity": 70.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "alpha",
+          "chokepoint": true,
+          "risk_level": "high",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-ALPHA-2-ALPHA-3",
+        "name": "Alpha leg 2->3",
+        "source_node_id": "N-ALPHA-2",
+        "target_node_id": "N-ALPHA-3",
+        "capacity": 65.0,
+        "transit_time_hours": 5.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "alpha",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-ALPHA-3-ALPHA-4",
+        "name": "Alpha leg 3->4",
+        "source_node_id": "N-ALPHA-3",
+        "target_node_id": "N-ALPHA-4",
+        "capacity": 60.0,
+        "transit_time_hours": 6.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "alpha",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-PORT-BRAVO-1",
+        "name": "Port to Bravo Entry",
+        "source_node_id": "N-MAIN-PORT",
+        "target_node_id": "N-BRAVO-1",
+        "capacity": 90.0,
+        "transit_time_hours": 7.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "bravo",
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-BRAVO-1-BRAVO-2",
+        "name": "Bravo leg 1->2",
+        "source_node_id": "N-BRAVO-1",
+        "target_node_id": "N-BRAVO-2",
+        "capacity": 70.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "bravo",
+          "chokepoint": true,
+          "risk_level": "high",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-BRAVO-2-BRAVO-3",
+        "name": "Bravo leg 2->3",
+        "source_node_id": "N-BRAVO-2",
+        "target_node_id": "N-BRAVO-3",
+        "capacity": 65.0,
+        "transit_time_hours": 5.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "bravo",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-BRAVO-3-BRAVO-4",
+        "name": "Bravo leg 3->4",
+        "source_node_id": "N-BRAVO-3",
+        "target_node_id": "N-BRAVO-4",
+        "capacity": 60.0,
+        "transit_time_hours": 6.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "bravo",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-PORT-CHARLIE-1",
+        "name": "Port to Charlie Entry",
+        "source_node_id": "N-MAIN-PORT",
+        "target_node_id": "N-CHARLIE-1",
+        "capacity": 90.0,
+        "transit_time_hours": 8.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "charlie",
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-CHARLIE-1-CHARLIE-2",
+        "name": "Charlie leg 1->2",
+        "source_node_id": "N-CHARLIE-1",
+        "target_node_id": "N-CHARLIE-2",
+        "capacity": 70.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "charlie",
+          "chokepoint": true,
+          "risk_level": "high",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-CHARLIE-2-CHARLIE-3",
+        "name": "Charlie leg 2->3",
+        "source_node_id": "N-CHARLIE-2",
+        "target_node_id": "N-CHARLIE-3",
+        "capacity": 65.0,
+        "transit_time_hours": 5.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "charlie",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-CHARLIE-3-CHARLIE-4",
+        "name": "Charlie leg 3->4",
+        "source_node_id": "N-CHARLIE-3",
+        "target_node_id": "N-CHARLIE-4",
+        "capacity": 60.0,
+        "transit_time_hours": 6.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "charlie",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-PORT-DELTA-1",
+        "name": "Port to Delta Entry",
+        "source_node_id": "N-MAIN-PORT",
+        "target_node_id": "N-DELTA-1",
+        "capacity": 90.0,
+        "transit_time_hours": 9.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "delta",
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-DELTA-1-DELTA-2",
+        "name": "Delta leg 1->2",
+        "source_node_id": "N-DELTA-1",
+        "target_node_id": "N-DELTA-2",
+        "capacity": 70.0,
+        "transit_time_hours": 4.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "delta",
+          "chokepoint": true,
+          "risk_level": "high",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-DELTA-2-DELTA-3",
+        "name": "Delta leg 2->3",
+        "source_node_id": "N-DELTA-2",
+        "target_node_id": "N-DELTA-3",
+        "capacity": 65.0,
+        "transit_time_hours": 5.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "delta",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      },
+      {
+        "route_id": "R-N-DELTA-3-DELTA-4",
+        "name": "Delta leg 3->4",
+        "source_node_id": "N-DELTA-3",
+        "target_node_id": "N-DELTA-4",
+        "capacity": 60.0,
+        "transit_time_hours": 6.0,
+        "status": "OPEN",
+        "metadata": {
+          "corridor": "delta",
+          "chokepoint": false,
+          "risk_level": "medium",
+          "topology": "scale_grid"
+        }
+      }
+    ]
+  },
+  "red_force_elements": [
+    {
+      "element_id": "RED-ALPHA-STRIKE",
+      "name": "Alpha Strike Cell",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": "N-ALPHA-1",
+      "patrol_route_ids": [
+        "R-PORT-ALPHA-1",
+        "R-N-ALPHA-1-ALPHA-2",
+        "R-N-ALPHA-2-ALPHA-3",
+        "R-N-ALPHA-3-ALPHA-4"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "strike_cooldown_ticks": 2,
+        "strike_budget": 30,
+        "priority_target": "alpha_corridors"
+      }
+    },
+    {
+      "element_id": "RED-ALPHA-RECON",
+      "name": "Alpha Recon Element",
+      "side": "RED",
+      "role": "RECONNAISSANCE",
+      "home_node_id": "N-ALPHA-2",
+      "patrol_route_ids": [
+        "R-PORT-ALPHA-1",
+        "R-N-ALPHA-1-ALPHA-2",
+        "R-N-ALPHA-2-ALPHA-3"
+      ],
+      "readiness": 0.85,
+      "metadata": {
+        "unit_type": "surveillance_team"
+      }
+    },
+    {
+      "element_id": "RED-BRAVO-STRIKE",
+      "name": "Bravo Strike Cell",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": "N-BRAVO-1",
+      "patrol_route_ids": [
+        "R-PORT-BRAVO-1",
+        "R-N-BRAVO-1-BRAVO-2",
+        "R-N-BRAVO-2-BRAVO-3",
+        "R-N-BRAVO-3-BRAVO-4"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "strike_cooldown_ticks": 2,
+        "strike_budget": 30,
+        "priority_target": "bravo_corridors"
+      }
+    },
+    {
+      "element_id": "RED-BRAVO-RECON",
+      "name": "Bravo Recon Element",
+      "side": "RED",
+      "role": "RECONNAISSANCE",
+      "home_node_id": "N-BRAVO-2",
+      "patrol_route_ids": [
+        "R-PORT-BRAVO-1",
+        "R-N-BRAVO-1-BRAVO-2",
+        "R-N-BRAVO-2-BRAVO-3"
+      ],
+      "readiness": 0.85,
+      "metadata": {
+        "unit_type": "surveillance_team"
+      }
+    },
+    {
+      "element_id": "RED-CHARLIE-STRIKE",
+      "name": "Charlie Strike Cell",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": "N-CHARLIE-1",
+      "patrol_route_ids": [
+        "R-PORT-CHARLIE-1",
+        "R-N-CHARLIE-1-CHARLIE-2",
+        "R-N-CHARLIE-2-CHARLIE-3",
+        "R-N-CHARLIE-3-CHARLIE-4"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "strike_cooldown_ticks": 2,
+        "strike_budget": 30,
+        "priority_target": "charlie_corridors"
+      }
+    },
+    {
+      "element_id": "RED-CHARLIE-RECON",
+      "name": "Charlie Recon Element",
+      "side": "RED",
+      "role": "RECONNAISSANCE",
+      "home_node_id": "N-CHARLIE-2",
+      "patrol_route_ids": [
+        "R-PORT-CHARLIE-1",
+        "R-N-CHARLIE-1-CHARLIE-2",
+        "R-N-CHARLIE-2-CHARLIE-3"
+      ],
+      "readiness": 0.85,
+      "metadata": {
+        "unit_type": "surveillance_team"
+      }
+    },
+    {
+      "element_id": "RED-DELTA-STRIKE",
+      "name": "Delta Strike Cell",
+      "side": "RED",
+      "role": "STRIKE",
+      "home_node_id": "N-DELTA-1",
+      "patrol_route_ids": [
+        "R-PORT-DELTA-1",
+        "R-N-DELTA-1-DELTA-2",
+        "R-N-DELTA-2-DELTA-3",
+        "R-N-DELTA-3-DELTA-4"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "interdiction_cell",
+        "strike_cooldown_ticks": 2,
+        "strike_budget": 30,
+        "priority_target": "delta_corridors"
+      }
+    },
+    {
+      "element_id": "RED-DELTA-RECON",
+      "name": "Delta Recon Element",
+      "side": "RED",
+      "role": "RECONNAISSANCE",
+      "home_node_id": "N-DELTA-2",
+      "patrol_route_ids": [
+        "R-PORT-DELTA-1",
+        "R-N-DELTA-1-DELTA-2",
+        "R-N-DELTA-2-DELTA-3"
+      ],
+      "readiness": 0.85,
+      "metadata": {
+        "unit_type": "surveillance_team"
+      }
+    }
+  ],
+  "blue_force_elements": [
+    {
+      "element_id": "BLUE-ALPHA-LOG",
+      "name": "Alpha Logistics Manager",
+      "side": "BLUE",
+      "role": "LOGISTICS_MANAGER",
+      "home_node_id": "N-ALPHA-1",
+      "patrol_route_ids": [
+        "R-PORT-ALPHA-1",
+        "R-N-ALPHA-1-ALPHA-2",
+        "R-N-ALPHA-2-ALPHA-3",
+        "R-N-ALPHA-3-ALPHA-4"
+      ],
+      "readiness": 0.95,
+      "metadata": {
+        "unit_type": "logistics_convoy",
+        "priority_mission": "corridor_sustainment"
+      }
+    },
+    {
+      "element_id": "BLUE-ALPHA-SEC",
+      "name": "Alpha Route Security",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-ALPHA-2",
+      "patrol_route_ids": [
+        "R-PORT-ALPHA-1",
+        "R-N-ALPHA-1-ALPHA-2",
+        "R-N-ALPHA-2-ALPHA-3"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "security_element",
+        "priority_mission": "chokepoint_hardening"
+      }
+    },
+    {
+      "element_id": "BLUE-ALPHA-DEPOT",
+      "name": "Alpha Depot Operator",
+      "side": "BLUE",
+      "role": "DEPOT_OPERATOR",
+      "home_node_id": "N-ALPHA-1",
+      "patrol_route_ids": [
+        "R-PORT-ALPHA-1"
+      ],
+      "readiness": 0.88,
+      "metadata": {
+        "unit_type": "depot_team"
+      }
+    },
+    {
+      "element_id": "BLUE-BRAVO-LOG",
+      "name": "Bravo Logistics Manager",
+      "side": "BLUE",
+      "role": "LOGISTICS_MANAGER",
+      "home_node_id": "N-BRAVO-1",
+      "patrol_route_ids": [
+        "R-PORT-BRAVO-1",
+        "R-N-BRAVO-1-BRAVO-2",
+        "R-N-BRAVO-2-BRAVO-3",
+        "R-N-BRAVO-3-BRAVO-4"
+      ],
+      "readiness": 0.95,
+      "metadata": {
+        "unit_type": "logistics_convoy",
+        "priority_mission": "corridor_sustainment"
+      }
+    },
+    {
+      "element_id": "BLUE-BRAVO-SEC",
+      "name": "Bravo Route Security",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-BRAVO-2",
+      "patrol_route_ids": [
+        "R-PORT-BRAVO-1",
+        "R-N-BRAVO-1-BRAVO-2",
+        "R-N-BRAVO-2-BRAVO-3"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "security_element",
+        "priority_mission": "chokepoint_hardening"
+      }
+    },
+    {
+      "element_id": "BLUE-BRAVO-DEPOT",
+      "name": "Bravo Depot Operator",
+      "side": "BLUE",
+      "role": "DEPOT_OPERATOR",
+      "home_node_id": "N-BRAVO-1",
+      "patrol_route_ids": [
+        "R-PORT-BRAVO-1"
+      ],
+      "readiness": 0.88,
+      "metadata": {
+        "unit_type": "depot_team"
+      }
+    },
+    {
+      "element_id": "BLUE-CHARLIE-LOG",
+      "name": "Charlie Logistics Manager",
+      "side": "BLUE",
+      "role": "LOGISTICS_MANAGER",
+      "home_node_id": "N-CHARLIE-1",
+      "patrol_route_ids": [
+        "R-PORT-CHARLIE-1",
+        "R-N-CHARLIE-1-CHARLIE-2",
+        "R-N-CHARLIE-2-CHARLIE-3",
+        "R-N-CHARLIE-3-CHARLIE-4"
+      ],
+      "readiness": 0.95,
+      "metadata": {
+        "unit_type": "logistics_convoy",
+        "priority_mission": "corridor_sustainment"
+      }
+    },
+    {
+      "element_id": "BLUE-CHARLIE-SEC",
+      "name": "Charlie Route Security",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-CHARLIE-2",
+      "patrol_route_ids": [
+        "R-PORT-CHARLIE-1",
+        "R-N-CHARLIE-1-CHARLIE-2",
+        "R-N-CHARLIE-2-CHARLIE-3"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "security_element",
+        "priority_mission": "chokepoint_hardening"
+      }
+    },
+    {
+      "element_id": "BLUE-CHARLIE-DEPOT",
+      "name": "Charlie Depot Operator",
+      "side": "BLUE",
+      "role": "DEPOT_OPERATOR",
+      "home_node_id": "N-CHARLIE-1",
+      "patrol_route_ids": [
+        "R-PORT-CHARLIE-1"
+      ],
+      "readiness": 0.88,
+      "metadata": {
+        "unit_type": "depot_team"
+      }
+    },
+    {
+      "element_id": "BLUE-DELTA-LOG",
+      "name": "Delta Logistics Manager",
+      "side": "BLUE",
+      "role": "LOGISTICS_MANAGER",
+      "home_node_id": "N-DELTA-1",
+      "patrol_route_ids": [
+        "R-PORT-DELTA-1",
+        "R-N-DELTA-1-DELTA-2",
+        "R-N-DELTA-2-DELTA-3",
+        "R-N-DELTA-3-DELTA-4"
+      ],
+      "readiness": 0.95,
+      "metadata": {
+        "unit_type": "logistics_convoy",
+        "priority_mission": "corridor_sustainment"
+      }
+    },
+    {
+      "element_id": "BLUE-DELTA-SEC",
+      "name": "Delta Route Security",
+      "side": "BLUE",
+      "role": "ROUTE_SECURITY",
+      "home_node_id": "N-DELTA-2",
+      "patrol_route_ids": [
+        "R-PORT-DELTA-1",
+        "R-N-DELTA-1-DELTA-2",
+        "R-N-DELTA-2-DELTA-3"
+      ],
+      "readiness": 0.9,
+      "metadata": {
+        "unit_type": "security_element",
+        "priority_mission": "chokepoint_hardening"
+      }
+    },
+    {
+      "element_id": "BLUE-DELTA-DEPOT",
+      "name": "Delta Depot Operator",
+      "side": "BLUE",
+      "role": "DEPOT_OPERATOR",
+      "home_node_id": "N-DELTA-1",
+      "patrol_route_ids": [
+        "R-PORT-DELTA-1"
+      ],
+      "readiness": 0.88,
+      "metadata": {
+        "unit_type": "depot_team"
+      }
+    }
+  ]
+}

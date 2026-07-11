@@ -3,11 +3,16 @@ name = "adsl-phase1"
 version = "0.1.0"
 description = "ADSL Phase 1 — Contested Logistics Stress Test MVP"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.0",
     "structlog>=24.0",
 ]
+
+[project.scripts]
+adsl-analyze = "adsl.cli.analyze:main"
+adsl-compare = "adsl.cli.compare:main"
 
 [project.optional-dependencies]
 dev = [
@@ -26,6 +31,9 @@ packages = ["src/adsl"]
 testpaths = ["src/tests"]
 pythonpath = ["src"]
 addopts = "-v --cov=adsl --cov-report=term-missing"
+markers = [
+    "live_foundry: tests requiring live Foundry credentials and network access",
+]
 
 [tool.coverage.run]
 source = ["adsl"]
